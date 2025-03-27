@@ -26,7 +26,7 @@ public class JwtUtil {
     }
 
     // Generate Token
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         Date issuedAt = new Date();
         Date expiration = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
@@ -36,6 +36,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -45,9 +46,6 @@ public class JwtUtil {
     // Mengambil email dari token
     public String extractEmail(String token) {
         try {
-            // Debugging token sebelum diproses
-            System.out.println("Received Token: [" + token + "]");
-
             return Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
@@ -78,4 +76,14 @@ public class JwtUtil {
                 .getExpiration()
                 .before(new Date());
     }
+
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
 }

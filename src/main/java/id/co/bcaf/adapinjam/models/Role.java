@@ -7,7 +7,6 @@ import lombok.*;
 @Table(name = "roles")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class Role {
@@ -18,4 +17,9 @@ public class Role {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name_role;
+
+    public Role(Integer id, String customer) {
+        this.id = id;
+        this.name_role = customer;
+    }
 }

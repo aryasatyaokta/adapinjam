@@ -22,11 +22,12 @@ public class UserEmployee {
     @JoinColumn(name = "id_user", referencedColumnName = "id", nullable = false)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "id_branch", referencedColumnName = "id", nullable = false)
+    private Branch branch;
+
     @Column(nullable = false, unique = true)
     private String nip;
-
-    @Column(name = "id_branch", nullable = false)
-    private int branchId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_employee", nullable = false)

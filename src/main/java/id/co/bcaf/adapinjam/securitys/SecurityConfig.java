@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -23,11 +25,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login").permitAll() // Buka akses login
-
+                        .requestMatchers("/api/v1/users").permitAll()
+                        .requestMatchers("/api/v1/user-employees").permitAll()
+                        .requestMatchers("/api/v1/auth/update-password").permitAll()
+                        .requestMatchers("/api/v1/plafon").permitAll()
+                        .requestMatchers("/api/v1/auth/register-customer").permitAll()
+                        .requestMatchers("/api/v1/customer/check-profile").permitAll()
+                        .requestMatchers("/api/v1/customer/add-customer-details").permitAll()
                         .anyRequest().authenticated()  // Endpoint lain harus pakai token
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

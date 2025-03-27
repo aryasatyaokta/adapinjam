@@ -39,7 +39,7 @@ public class UserEmployeeService {
         return userEmployeeRepository.findById(id).map(data -> {
             data.setUser(updatedData.getUser());
             data.setNip(updatedData.getNip());
-            data.setBranchId(updatedData.getBranchId());
+            data.setBranch(updatedData.getBranch());
             data.setStatusEmployee(updatedData.getStatusEmployee());
             return userEmployeeRepository.save(data);
         });

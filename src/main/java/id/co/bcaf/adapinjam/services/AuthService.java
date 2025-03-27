@@ -1,45 +1,66 @@
 package id.co.bcaf.adapinjam.services;
 
+import id.co.bcaf.adapinjam.dtos.RegisterRequest;
+import id.co.bcaf.adapinjam.models.Role;
 import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.Optional;
 
 @Service
 public class AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-
-    @Autowired
-    private UserRepository usersRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public String authenticateUser(String email, String password) {
-        logger.info("Mencoba login dengan email: {}", email);  // Cek apakah email diterima
+        Optional<User> optionalUser = userRepository.findByEmail(email);
 
-        Optional<User> userOptional = usersRepository.findByEmail(email);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            logger.info("User ditemukan: {}", user.getEmail()); // Konfirmasi user ditemukan di database
-            // Langsung bandingkan dengan password di database (karena belum di-hash)
-            if (user.getPassword().equals(password)) {
-                logger.info("Password cocok, menghasilkan token...");
-                return jwtUtil.generateToken(email); // Kembalikan JWT Token
-            }
-            else {
-                logger.warn("Password tidak cocok untuk email: {}", email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (passwordEncoder.matches(password, user.getPassword())) { // Hash password checking
+                logger.info("User {} authenticated, generating token...", email);
+                return jwtUtil.generateToken(email, user.getRole().getName_role());
             }
         }
-        else {
-            logger.warn("User dengan email {} tidak ditemukan di database", email);
-        }
-        return null; // Jika gagal login
+
+        logger.warn("Invalid login attempt for email: {}", email);
+        return null;
+    }
+
+    public boolean updatePassword(String email, String oldPassword, String newPassword) {
+        return userRepository.findByEmail(email).map(user -> {
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) { // Hash password checking
+                logger.warn("Update password failed: incorrect old password for user {}", email);
+                return false;
+            }
+
+            user.setPassword(passwordEncoder.encode(newPassword)); // Hash new password
+            userRepository.save(user);
+            logger.info("Password updated successfully for user {}", email);
+            return true;
+        }).orElse(false);
+    }
+
+    public User registerCustomer(RegisterRequest request) {
+        User user = new User();
+        user.setEmail(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // Hash password
+        user.setName(request.getName());
+        user.setRole(new Role(5, "Customer"));
+
+        return userRepository.save(user);
     }
 }
