@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface UserEmployeeRepository extends JpaRepository<UserEmployee, UUID> {
     Optional<UserEmployee> findById(UUID id);
+    Optional<UserEmployee> findByNip(String nip);
 }

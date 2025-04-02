@@ -3,6 +3,8 @@ package id.co.bcaf.adapinjam.services;
 import id.co.bcaf.adapinjam.dtos.RegisterRequest;
 import id.co.bcaf.adapinjam.models.Role;
 import id.co.bcaf.adapinjam.models.User;
+import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final UserEmployeeRepository userEmployeeRepository;
 
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.userEmployeeRepository = userEmployeeRepository;
     }
 
     public String authenticateUser(String email, String password) {
@@ -37,6 +41,18 @@ public class AuthService {
         }
 
         logger.warn("Invalid login attempt for email: {}", email);
+        return null;
+    }
+
+    public String authenticateUserEmployee(String nip, String password) {
+        Optional<UserEmployee> optionalUserEmployee = userEmployeeRepository.findByNip(nip);
+
+        if (optionalUserEmployee.isPresent()) {
+            UserEmployee userEmployee = optionalUserEmployee.get();
+            if (passwordEncoder.matches(password, userEmployee.getUser().getPassword())) {
+                return jwtUtil.generateToken(userEmployee.getUser().getEmail(), userEmployee.getUser().getRole().getName_role());
+            }
+        }
         return null;
     }
 

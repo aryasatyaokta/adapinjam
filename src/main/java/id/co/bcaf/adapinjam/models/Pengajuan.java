@@ -35,5 +35,5 @@ public class Pengajuan {
     private String status;
 
     @Column(name = "bunga", nullable = false)
-    private String bunga;
+    private Double bunga;
 }

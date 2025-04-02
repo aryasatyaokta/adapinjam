@@ -5,6 +5,7 @@ import id.co.bcaf.adapinjam.dtos.AuthResponse;
 import id.co.bcaf.adapinjam.dtos.RegisterRequest;
 import id.co.bcaf.adapinjam.dtos.UpdatePassRequest;
 import id.co.bcaf.adapinjam.services.AuthService;
+import id.co.bcaf.adapinjam.services.TokenBlacklistService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ public class AuthController {
     private JwtUtil jwtUtil;
     @Autowired
     private AuthService authService;
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
@@ -76,5 +79,24 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7).trim();
+            // Blacklist the token
+            tokenBlacklistService.blacklistToken(token);
+            return ResponseEntity.ok("Logged out successfully");
+        }
+        return ResponseEntity.badRequest().body("Invalid or missing Authorization header");
+    }
+
+    @PostMapping("/login-employee")
+    public ResponseEntity<?> loginEmployee(@RequestBody AuthRequest authRequest) {
+        String token = authService.authenticateUserEmployee(authRequest.getUsername(), authRequest.getPassword());
+        if (token != null) {
+            return ResponseEntity.ok(new AuthResponse(token));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid NIP or password");
+    }
 
 }

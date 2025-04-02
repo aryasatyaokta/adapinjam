@@ -1,5 +1,6 @@
 package id.co.bcaf.adapinjam.securitys;
 
+import id.co.bcaf.adapinjam.services.TokenBlacklistService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,9 +25,11 @@ import java.util.List;
 public class JwtFilter extends GenericFilterBean {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class JwtFilter extends GenericFilterBean {
         String authHeader = httpRequest.getHeader("Authorization");
 
         // Bypass filter untuk endpoint login
-        if (httpRequest.getRequestURI().startsWith("/api/v1/auth/login") || httpRequest.getRequestURI().startsWith("/api/v1/auth/register-customer")) {
+        if (httpRequest.getRequestURI().startsWith("/api/v1/auth/login") || httpRequest.getRequestURI().startsWith("/api/v1/auth/register-customer") || httpRequest.getRequestURI().startsWith("/api/v1/auth/login-employee") || httpRequest.getRequestURI().startsWith("/api/v1/user-employee/add")) {
             chain.doFilter(request, response);
             return;
         }
@@ -48,6 +51,10 @@ public class JwtFilter extends GenericFilterBean {
         }
 
         String token = authHeader.substring(7).trim();
+        if (tokenBlacklistService.isTokenBlacklisted(token)) {
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is blacklisted");
+            return;
+        }
 
         try {
             String email = jwtUtil.extractEmail(token);

@@ -26,7 +26,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login").permitAll() // Buka akses login
                         .requestMatchers("/api/v1/users").permitAll()
-                        .requestMatchers("/api/v1/user-employees").permitAll()
+                        .requestMatchers("/api/v1/user-employee").permitAll()
+                        .requestMatchers("/api/v1/user-employee/add").permitAll()
+                        .requestMatchers("/api/v1/auth/login-employee").permitAll()
                         .requestMatchers("/api/v1/auth/update-password").permitAll()
                         .requestMatchers("/api/v1/plafon").permitAll()
                         .requestMatchers("/api/v1/auth/register-customer").permitAll()
