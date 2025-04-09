@@ -2,6 +2,8 @@ package id.co.bcaf.adapinjam.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -36,4 +38,8 @@ public class Pinjaman {
 
     @Column(name = "sisa_ph", nullable = false)
     private Integer sisaPokokHutang;
+
+    @Column(name = "lunas", nullable = false)
+    private Boolean lunas;
 }
+

@@ -38,7 +38,8 @@ public class CustomerService {
             throw new RuntimeException("Customer details already exist");
         }
 
-        Plafon plafon = plafonRepository.findById(customerRequest.getIdPlafon())
+        int defaultPlafon = 1;
+        Plafon plafon = plafonRepository.findById(defaultPlafon)
                 .orElseThrow(() -> new RuntimeException("Plafon not found"));
 
         UserCustomer customer = new UserCustomer();
@@ -53,7 +54,8 @@ public class CustomerService {
         customer.setGaji(customerRequest.getGaji());
         customer.setNoRek(customerRequest.getNoRek());
         customer.setStatusRumah(customerRequest.getStatusRumah());
-        customer.setSisaPlafon(customerRequest.getSisaPlafon());
+//        customer.setSisaPlafon(customerRequest.getSisaPlafon());
+        customer.setSisaPlafon(plafon.getJumlahPlafon());
 
         return customerRepository.save(customer);
     }

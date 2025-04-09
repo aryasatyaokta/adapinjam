@@ -2,6 +2,10 @@ package id.co.bcaf.adapinjam.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
+@Getter
+@Setter
 @Entity
 @Data
 @NoArgsConstructor
@@ -9,8 +13,8 @@ import lombok.*;
 @Table(name = "pengajuan_user_employees")
 public class PengajuanToUserEmployee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "id_pengajuan", nullable = false)
@@ -18,5 +22,5 @@ public class PengajuanToUserEmployee {
 
     @ManyToOne
     @JoinColumn(name = "id_user_employee", nullable = false)
-    private UserCustomer userCustomer;
+    private UserEmployee userEmployee;
 }
