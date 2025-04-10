@@ -40,7 +40,7 @@ public class JwtFilter extends GenericFilterBean {
         String authHeader = httpRequest.getHeader("Authorization");
 
         // Bypass filter untuk endpoint login
-        if (httpRequest.getRequestURI().startsWith("/api/v1/auth/login") || httpRequest.getRequestURI().startsWith("/api/v1/auth/register-customer") || httpRequest.getRequestURI().startsWith("/api/v1/auth/login-employee") || httpRequest.getRequestURI().startsWith("/api/v1/user-employee/add")) {
+        if (httpRequest.getRequestURI().startsWith("/api/v1/users") || httpRequest.getRequestURI().startsWith("/api/v1/auth/login") || httpRequest.getRequestURI().startsWith("/api/v1/auth/register-customer") || httpRequest.getRequestURI().startsWith("/api/v1/auth/login-employee") || httpRequest.getRequestURI().startsWith("/api/v1/user-employee/add") || httpRequest.getRequestURI().startsWith("/api/v1/auth/forgot-password") || httpRequest.getRequestURI().startsWith("/api/v1/auth/reset-password")) {
             chain.doFilter(request, response);
             return;
         }

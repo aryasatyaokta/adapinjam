@@ -33,7 +33,7 @@ public class PinjamanService {
         pinjaman.setBunga(bunga);
         pinjaman.setAngsuran(angsuran);
         pinjaman.setSisaTenor(tenor);
-        pinjaman.setSisaPokokHutang(amount.intValue());
+        pinjaman.setSisaPokokHutang((angsuran * tenor));
         pinjaman.setLunas(false);
 
         pinjamanRepository.save(pinjaman);
@@ -44,7 +44,14 @@ public class PinjamanService {
                 .orElseThrow(() -> new RuntimeException("Pinjaman not found"));
 
         pinjaman.setLunas(true);
+        pinjaman.setSisaTenor(0);
+        pinjaman.setSisaPokokHutang(0.0);
+        pinjaman.setAngsuran(0.0);
+        UserCustomer customer = pinjaman.getCustomer();
+        customer.setSisaPlafon(customer.getSisaPlafon() + pinjaman.getAmount());
+
         pinjamanRepository.save(pinjaman);
+        customerRepository.save(customer);
 
         UUID customerId = pinjaman.getCustomer().getId();
         List<Pinjaman> lunasList = pinjamanRepository.findByCustomer_IdAndLunasTrue(customerId);

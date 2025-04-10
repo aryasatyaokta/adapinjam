@@ -37,7 +37,7 @@ public class Pinjaman {
     private Integer sisaTenor;
 
     @Column(name = "sisa_ph", nullable = false)
-    private Integer sisaPokokHutang;
+    private Double sisaPokokHutang;
 
     @Column(name = "lunas", nullable = false)
     private Boolean lunas;

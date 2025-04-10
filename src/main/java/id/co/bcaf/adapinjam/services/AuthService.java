@@ -11,6 +11,13 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import jakarta.mail.internet.MimeMessage;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 import java.util.Optional;
 
@@ -21,12 +28,15 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserEmployeeRepository userEmployeeRepository;
+    private final JavaMailSender mailSender;
+    private final Map<String, String> resetTokenMap = new ConcurrentHashMap<>();
 
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository, JavaMailSender mailSender) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userEmployeeRepository = userEmployeeRepository;
+        this.mailSender = mailSender;
     }
 
     public String authenticateUser(String email, String password) {
@@ -79,4 +89,41 @@ public class AuthService {
 
         return userRepository.save(user);
     }
+
+    public void sendResetPasswordEmail(String email) throws Exception {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new Exception("User not found");
+        }
+
+        String token = jwtUtil.generateResetToken(email); // Custom method
+        resetTokenMap.put(token, email);
+
+        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(email);
+        helper.setSubject("Reset your password");
+        helper.setText("Click the link to reset your password: " + resetLink, true);
+
+        mailSender.send(message);
+    }
+
+    public boolean resetPassword(String token, String newPassword) {
+        String email = resetTokenMap.get(token);
+        if (email == null || !jwtUtil.validateToken(token, email)) {
+            return false;
+        }
+
+        return userRepository.findByEmail(email).map(user -> {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            resetTokenMap.remove(token);
+            return true;
+        }).orElse(false);
+    }
+
+
 }

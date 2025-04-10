@@ -86,4 +86,17 @@ public class JwtUtil {
                 .get("role", String.class);
     }
 
+    public String generateResetToken(String email) {
+        Date issuedAt = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 15); // 15 menit
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
 }
