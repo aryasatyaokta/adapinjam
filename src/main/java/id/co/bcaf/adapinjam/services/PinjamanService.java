@@ -80,5 +80,46 @@ public class PinjamanService {
     public List<Pinjaman> getByCustomerId(UUID customerId) {
         return pinjamanRepository.findByCustomer_Id(customerId);
     }
+    public void bayarPinjaman(UUID pinjamanId, int jumlahTenor, double jumlahBayar) {
+        Pinjaman pinjaman = pinjamanRepository.findById(pinjamanId)
+                .orElseThrow(() -> new RuntimeException("Pinjaman tidak ditemukan."));
+
+        if (pinjaman.getLunas()) {
+            throw new RuntimeException("Pinjaman ini sudah lunas.");
+        }
+
+        // Validasi tenor & jumlah bayar
+        if (jumlahTenor <= 0 || jumlahTenor > pinjaman.getSisaTenor()) {
+            throw new RuntimeException("Jumlah tenor tidak valid.");
+        }
+
+        double totalBayarDiharapkan = pinjaman.getAngsuran() * jumlahTenor;
+        if (jumlahBayar < totalBayarDiharapkan) {
+            throw new RuntimeException("Jumlah bayar kurang dari angsuran seharusnya: " + totalBayarDiharapkan);
+        }
+
+        // Kurangi sisa tenor & sisa pokok hutang
+        pinjaman.setSisaTenor(pinjaman.getSisaTenor() - jumlahTenor);
+        pinjaman.setSisaPokokHutang(pinjaman.getSisaPokokHutang() - totalBayarDiharapkan);
+
+        // Jika sisa tenor = 0 dan sisa pokok hutang <= 0 maka tandai lunas
+        if (pinjaman.getSisaTenor() == 0 || pinjaman.getSisaPokokHutang() <= 0) {
+            pinjaman.setLunas(true);
+            pinjaman.setSisaPokokHutang(0.0);
+            pinjaman.setAngsuran(0.0);
+            pinjaman.getCustomer().setSisaPlafon(pinjaman.getCustomer().getSisaPlafon() + pinjaman.getAmount());
+
+            // Simpan perubahan customer dan cek upgrade plafon
+            customerRepository.save(pinjaman.getCustomer());
+
+            UUID customerId = pinjaman.getCustomer().getId();
+            List<Pinjaman> lunasList = pinjamanRepository.findByCustomer_IdAndLunasTrue(customerId);
+            double totalLunas = lunasList.stream().mapToDouble(Pinjaman::getAmount).sum();
+
+            upgradePlafonIfEligible(pinjaman.getCustomer(), totalLunas);
+        }
+        pinjamanRepository.save(pinjaman);
+    }
+
 }
 

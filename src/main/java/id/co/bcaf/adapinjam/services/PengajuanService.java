@@ -1,6 +1,8 @@
 package id.co.bcaf.adapinjam.services;
 
 import id.co.bcaf.adapinjam.dtos.PengajuanResponse;
+import id.co.bcaf.adapinjam.dtos.PengajuanWithNotesResponse;
+import id.co.bcaf.adapinjam.dtos.ReviewHistoryResponse;
 import id.co.bcaf.adapinjam.models.Pengajuan;
 import id.co.bcaf.adapinjam.models.PengajuanToUserEmployee;
 import id.co.bcaf.adapinjam.models.UserCustomer;
@@ -14,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PengajuanService {
@@ -47,7 +51,7 @@ public class PengajuanService {
             throw new RuntimeException("Sisa plafon tidak mencukupi untuk pengajuan ini");
         }
 
-        double bunga = 5.0;
+        double bunga = customer.getPlafon().getBunga();
         double angsuran = calculateAngsuran(amount, tenor, bunga);
 
         Pengajuan pengajuan = new Pengajuan();
@@ -85,14 +89,16 @@ public class PengajuanService {
         );
     }
 
-    public void reviewPengajuan(UUID pengajuanId, UUID employeeId, boolean isApproved) {
+    public void reviewPengajuan(UUID pengajuanId, UUID employeeId, boolean isApproved, String catatan) {
         PengajuanToUserEmployee link = pengajuanUserRepo.findByPengajuanIdAndUserEmployeeId(pengajuanId, employeeId)
                 .orElseThrow(() -> new RuntimeException("Pengajuan not found or not assigned to this employee"));
 
         Pengajuan pengajuan = link.getPengajuan();
         UserEmployee employee = link.getUserEmployee();
 
-        // Role validation per bucket
+        link.setCatatan(catatan);
+        pengajuanUserRepo.save(link);
+
         String status = pengajuan.getStatus();
         int employeeRole = employee.getUser().getRole().getId();
 
@@ -106,25 +112,32 @@ public class PengajuanService {
         }
 
         if (!isApproved) {
-            pengajuan.setStatus("REJECT_" + employee.getUser().getRole().getName_role().toUpperCase());
-        } else {
-            switch (status) {
-                case "BCKT_MARKETING" -> pengajuan.setStatus("BCKT_BRANCHMANAGER");
-                case "BCKT_BRANCHMANAGER" -> pengajuan.setStatus("BCKT_BACKOFFICE");
-                case "BCKT_BACKOFFICE" -> {
-                    pengajuan.setStatus("DISBURSEMENT");
-                    pengajuanRepo.save(pengajuan);
+            // Restore sisa plafon
+            UserCustomer customer = pengajuan.getCustomer();
+            customer.setSisaPlafon(customer.getSisaPlafon() + pengajuan.getAmount());
+            customerRepo.save(customer);
 
-                    // Simpan sebagai history pinjaman
-                    pinjamanService.createPinjamanFromPengajuan(
-                            pengajuan.getCustomer(),
-                            pengajuan.getAmount(),
-                            pengajuan.getTenor(),
-                            pengajuan.getBunga(),
-                            pengajuan.getAngsuran()
-                    );
-                    return;
-                }
+            pengajuan.setStatus("REJECT_" + employee.getUser().getRole().getName_role().toUpperCase());
+            pengajuanRepo.save(pengajuan);
+            return;
+        }
+
+        switch (status) {
+            case "BCKT_MARKETING" -> pengajuan.setStatus("BCKT_BRANCHMANAGER");
+            case "BCKT_BRANCHMANAGER" -> pengajuan.setStatus("BCKT_BACKOFFICE");
+            case "BCKT_BACKOFFICE" -> {
+                pengajuan.setStatus("DISBURSEMENT");
+                pengajuanRepo.save(pengajuan);
+
+                // Simpan sebagai history pinjaman
+                pinjamanService.createPinjamanFromPengajuan(
+                        pengajuan.getCustomer(),
+                        pengajuan.getAmount(),
+                        pengajuan.getTenor(),
+                        pengajuan.getBunga(),
+                        pengajuan.getAngsuran()
+                );
+                return;
             }
         }
 
@@ -140,6 +153,7 @@ public class PengajuanService {
             if (nextRoleId > 0) assignToNextReviewer(pengajuan, nextRoleId);
         }
     }
+
 
 
     private void assignToNextReviewer(Pengajuan pengajuan, int roleId) {
@@ -162,12 +176,74 @@ public class PengajuanService {
 
     private double calculateAngsuran(double amount, int tenor, double bunga) {
         double total = amount + (amount * bunga / 100);
-        return total / tenor;
+        double rawAngsuran = total / tenor;
+        return Math.round(rawAngsuran * 100.0) / 100.0;
     }
 
-    public List<Pengajuan> getPengajuanToReviewByEmployee(UUID employeeId) {
+    public List<PengajuanWithNotesResponse> getPengajuanToReviewByEmployee(UUID employeeId) {
         List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByUserEmployeeId(employeeId);
-        return links.stream().map(PengajuanToUserEmployee::getPengajuan).toList();
+
+        return links.stream().map(link -> {
+            Pengajuan pengajuan = link.getPengajuan();
+            UserCustomer customer = pengajuan.getCustomer();  // Ambil data customer
+            List<String> catatanList = pengajuanUserRepo.findByPengajuanId(pengajuan.getId()).stream()
+                    .map(PengajuanToUserEmployee::getCatatan)
+                    .filter(catatan -> catatan != null)  // Menghindari null
+                    .collect(Collectors.toList());
+
+            return new PengajuanWithNotesResponse(pengajuan, customer, catatanList);
+        }).collect(Collectors.toList());
     }
+
+    public List<ReviewHistoryResponse> getReviewHistoryByEmployee(UUID employeeId) {
+        // Ambil semua pengajuan yang pernah ditinjau oleh employeeId
+        List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByUserEmployeeId(employeeId);
+
+        // Ambil role ID dari employee yang sedang mengakses
+        UserEmployee employee = userEmployeeRepo.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        int employeeRole = employee.getUser().getRole().getId(); // Role ID: 2 (Back Office), 3 (Branch Manager), 4 (Marketing)
+
+        // Memfilter pengajuan berdasarkan status yang relevan untuk role ini
+        return links.stream().map(link -> {
+                    Pengajuan pengajuan = link.getPengajuan();
+                    String status = pengajuan.getStatus();
+
+                    // Pastikan pengajuan hanya dikembalikan jika statusnya sesuai dengan peran employee
+                    if (isStatusValidForRole(status, employeeRole)) {
+                        String catatan = link.getCatatan();
+
+                        return new ReviewHistoryResponse(
+                                pengajuan.getId(),
+                                pengajuan.getAmount(),
+                                pengajuan.getTenor(),
+                                pengajuan.getBunga(),
+                                pengajuan.getAngsuran(),
+                                pengajuan.getStatus(),
+                                catatan
+                        );
+                    }
+                    return null;  // Jika status tidak valid untuk role, kembalikan null
+                })
+                .filter(Objects::nonNull) // Filter null values
+                .collect(Collectors.toList());
+    }
+
+    private boolean isStatusValidForRole(String status, int roleId) {
+        // Pastikan status sesuai dengan peran masing-masing
+        switch (roleId) {
+            case 4: // Marketing
+                return status.equals("BCKT_MARKETING");
+            case 3: // Branch Manager
+                return status.equals("BCKT_BRANCHMANAGER");
+            case 2: // Back Office
+                return status.equals("BCKT_BACKOFFICE");
+            default:
+                return false;
+        }
+    }
+
+
 
 }

@@ -1,8 +1,6 @@
 package id.co.bcaf.adapinjam.controllers;
 
-import id.co.bcaf.adapinjam.dtos.PengajuanRequest;
-import id.co.bcaf.adapinjam.dtos.PengajuanResponse;
-import id.co.bcaf.adapinjam.dtos.ReviewRequest;
+import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.Pengajuan;
 import id.co.bcaf.adapinjam.services.PengajuanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,7 @@ public class PengajuanController {
 
     @PostMapping("/review")
     public ResponseEntity<?> review(@RequestBody ReviewRequest request) {
-        pengajuanService.reviewPengajuan(request.getPengajuanId(), request.getEmployeeId(), request.isApproved());
+        pengajuanService.reviewPengajuan(request.getPengajuanId(), request.getEmployeeId(), request.isApproved(), request.getCatatan());
         return ResponseEntity.ok("Review success");
     }
 
@@ -44,8 +42,14 @@ public class PengajuanController {
 
     @GetMapping("/to-review/{employeeId}")
     public ResponseEntity<?> getPengajuanToReview(@PathVariable UUID employeeId) {
-        List<Pengajuan> list = pengajuanService.getPengajuanToReviewByEmployee(employeeId);
+        List<PengajuanWithNotesResponse> list = pengajuanService.getPengajuanToReviewByEmployee(employeeId);
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/review-history/{employeeId}")
+    public ResponseEntity<?> getReviewHistory(@PathVariable UUID employeeId) {
+        List<ReviewHistoryResponse> history = pengajuanService.getReviewHistoryByEmployee(employeeId);
+        return ResponseEntity.ok(history);
     }
 
 }

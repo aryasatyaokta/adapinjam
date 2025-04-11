@@ -23,4 +23,7 @@ public class PengajuanToUserEmployee {
     @ManyToOne
     @JoinColumn(name = "id_user_employee", nullable = false)
     private UserEmployee userEmployee;
+
+    @Column(name = "catatan", columnDefinition = "TEXT")
+    private String catatan;
 }

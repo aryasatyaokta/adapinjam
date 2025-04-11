@@ -6,6 +6,7 @@ import id.co.bcaf.adapinjam.repositories.RoleRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,9 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -32,6 +36,7 @@ public class UserService {
         Integer roleId = user.getRole().getId();
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
         user.setRole(role);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -42,7 +47,7 @@ public class UserService {
             user.setRole(role);
             user.setEmail(userDetails.getEmail());
             user.setName(userDetails.getName());
-            user.setPassword(userDetails.getPassword());
+            user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
             return userRepository.save(user);
         });
     }

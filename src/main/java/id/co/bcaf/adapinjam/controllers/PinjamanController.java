@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,5 +27,19 @@ public class PinjamanController {
     public ResponseEntity<?> getByCustomer(@PathVariable UUID customerId) {
         return ResponseEntity.ok(pinjamanService.getByCustomerId(customerId));
     }
+
+    @PostMapping("/bayar/{id}")
+    public ResponseEntity<?> bayarPinjaman(
+            @PathVariable UUID id,
+            @RequestBody Map<String, Object> body
+    ) {
+        int jumlahTenor = (int) body.get("jumlahTenor");
+        double jumlahBayar = Double.parseDouble(body.get("jumlahBayar").toString());
+
+        pinjamanService.bayarPinjaman(id, jumlahTenor, jumlahBayar);
+        return ResponseEntity.ok("Pembayaran berhasil diproses.");
+    }
+
+
 }
 
