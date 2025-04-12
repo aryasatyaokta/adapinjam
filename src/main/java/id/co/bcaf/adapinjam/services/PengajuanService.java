@@ -1,5 +1,6 @@
 package id.co.bcaf.adapinjam.services;
 
+import id.co.bcaf.adapinjam.dtos.PengajuanHistoryResponse;
 import id.co.bcaf.adapinjam.dtos.PengajuanResponse;
 import id.co.bcaf.adapinjam.dtos.PengajuanWithNotesResponse;
 import id.co.bcaf.adapinjam.dtos.ReviewHistoryResponse;
@@ -15,6 +16,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -61,6 +64,7 @@ public class PengajuanService {
         pengajuan.setBunga(bunga);
         pengajuan.setAngsuran(angsuran);
         pengajuan.setStatus("BCKT_MARKETING");
+        pengajuan.setCreatedAt(LocalDateTime.now());
         pengajuanRepo.save(pengajuan);
 
         customer.setSisaPlafon(customer.getSisaPlafon() - amount);
@@ -85,7 +89,11 @@ public class PengajuanService {
                 pengajuan.getAngsuran(),
                 pengajuan.getStatus(),
                 marketing.getBranch().getId(),
-                marketing.getUser().getName()
+                marketing.getUser().getName(),
+                pengajuan.getCreatedAt(),
+                pengajuan.getMarketingApprovedAt(),
+                pengajuan.getBranchManagerApprovedAt(),
+                pengajuan.getBackOfficeApprovedAt()
         );
     }
 
@@ -123,10 +131,17 @@ public class PengajuanService {
         }
 
         switch (status) {
-            case "BCKT_MARKETING" -> pengajuan.setStatus("BCKT_BRANCHMANAGER");
-            case "BCKT_BRANCHMANAGER" -> pengajuan.setStatus("BCKT_BACKOFFICE");
+            case "BCKT_MARKETING" -> {
+                pengajuan.setStatus("BCKT_BRANCHMANAGER");
+                pengajuan.setMarketingApprovedAt(LocalDateTime.now());  // Set tanggal approval Marketing
+            }
+            case "BCKT_BRANCHMANAGER" -> {
+                pengajuan.setStatus("BCKT_BACKOFFICE");
+                pengajuan.setBranchManagerApprovedAt(LocalDateTime.now());  // Set tanggal approval Branch Manager
+            }
             case "BCKT_BACKOFFICE" -> {
                 pengajuan.setStatus("DISBURSEMENT");
+                pengajuan.setBackOfficeApprovedAt(LocalDateTime.now());  // Set tanggal approval Back Office
                 pengajuanRepo.save(pengajuan);
 
                 // Simpan sebagai history pinjaman
@@ -244,6 +259,38 @@ public class PengajuanService {
         }
     }
 
+    public List<PengajuanHistoryResponse> getPengajuanHistoryByCustomer(UUID customerId) {
+        List<Pengajuan> pengajuanList = pengajuanRepo.findByCustomer_Id(customerId);
+
+        return pengajuanList.stream().map(pengajuan -> {
+            // Ambil tanggal approve untuk setiap role
+
+            return new PengajuanHistoryResponse(
+                    pengajuan.getId(),
+                    pengajuan.getAmount(),
+                    pengajuan.getTenor(),
+                    pengajuan.getBunga(),
+                    pengajuan.getAngsuran(),
+                    pengajuan.getStatus(),
+                    pengajuan.getMarketingApprovedAt(),
+                    pengajuan.getBranchManagerApprovedAt(),
+                    pengajuan.getBackOfficeApprovedAt(),
+                    pengajuan.getDisbursementAt()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    private Date getApprovedDate(Pengajuan pengajuan, String status) {
+        // Cari catatan pengajuan untuk mendapatkan tanggal approval
+        List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByPengajuanId(pengajuan.getId());
+        for (PengajuanToUserEmployee link : links) {
+            if (pengajuan.getStatus().equals(status)) {
+                // Ambil tanggal approve dari pengajuan jika ada
+                return new Date(); // Implementasikan logika untuk mendapatkan tanggal sesuai catatan atau status
+            }
+        }
+        return null; // Jika tidak ada, return null
+    }
 
 
 }

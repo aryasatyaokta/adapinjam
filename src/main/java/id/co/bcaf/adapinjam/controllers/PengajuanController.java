@@ -5,6 +5,7 @@ import id.co.bcaf.adapinjam.models.Pengajuan;
 import id.co.bcaf.adapinjam.services.PengajuanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,10 +35,11 @@ public class PengajuanController {
         return ResponseEntity.ok("Review success");
     }
 
-    @GetMapping("/customer/{customerId}")
-    public ResponseEntity<?> getPengajuanByCustomer(@PathVariable UUID customerId) {
-        List<Pengajuan> list = pengajuanService.getPengajuanByCustomerId(customerId);
-        return ResponseEntity.ok(list);
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FEATURE_GET_IDPENGAJUAN_CUSTOMER')")
+    @GetMapping("/history/{customerId}")
+    public ResponseEntity<?> getHistoryPengajuanByCustomer(@PathVariable UUID customerId) {
+        List<PengajuanHistoryResponse> historyList = pengajuanService.getPengajuanHistoryByCustomer(customerId);
+        return ResponseEntity.ok(historyList);
     }
 
     @GetMapping("/to-review/{employeeId}")

@@ -3,6 +3,7 @@ package id.co.bcaf.adapinjam.dtos;
 import id.co.bcaf.adapinjam.models.UserCustomer;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -20,4 +21,8 @@ public class PengajuanResponse {
     private String status;
     private UUID branchId;
     private String namaMarketing;
+    private LocalDateTime createdAt;
+    private LocalDateTime marketingApprovedAt;
+    private LocalDateTime branchManagerApprovedAt;
+    private LocalDateTime backOfficeApprovedAt;
 }

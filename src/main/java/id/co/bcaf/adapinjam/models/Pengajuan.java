@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -36,4 +38,19 @@ public class Pengajuan {
 
     @Column(name = "bunga", nullable = false)
     private Double bunga;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "marketing_approved_at")
+    private LocalDateTime marketingApprovedAt;
+
+    @Column(name = "branch_manager_approved_at")
+    private LocalDateTime branchManagerApprovedAt;
+
+    @Column(name = "back_office_approved_at")
+    private LocalDateTime backOfficeApprovedAt;
+
+    @Column(name = "disbursement_at")
+    private LocalDateTime disbursementAt;
 }
