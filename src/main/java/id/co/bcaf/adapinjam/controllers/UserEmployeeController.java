@@ -28,6 +28,7 @@ public class UserEmployeeController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
     // Endpoint untuk menambahkan UserEmployee
     @PostMapping("/add")
     public ResponseEntity<?> addUserEmployee(@RequestBody UserEmployee userEmployee) {
@@ -51,6 +52,7 @@ public class UserEmployeeController {
         return ResponseEntity.ok(employees);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BYID')")
     // Endpoint untuk mendapatkan UserEmployee berdasarkan ID (UUID)
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getUserEmployeeById(@PathVariable String id) {
@@ -67,6 +69,7 @@ public class UserEmployeeController {
         }
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
     // Endpoint untuk memperbarui UserEmployee
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUserEmployee(@PathVariable String id, @RequestBody UserEmployee updatedData) {

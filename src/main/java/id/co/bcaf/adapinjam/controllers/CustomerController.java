@@ -7,6 +7,7 @@ import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class CustomerController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CHECK_PROFILECUST')")
     @GetMapping("/check-profile")
     public ResponseEntity<?> checkProfile(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -36,6 +38,7 @@ public class CustomerController {
         return ResponseEntity.ok("Profile complete. You can proceed with applications");
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CUSTOMER_DETAILS')")
     @PostMapping("/add-customer-details")
     public ResponseEntity<?> addCustomerDetails(@RequestHeader("Authorization") String authHeader, @RequestBody CustomerRequest customerRequest){
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
@@ -48,6 +51,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'EDIT_CUSTOMER_DETAILS')")
     @PutMapping("/edit-customer-details")
     public ResponseEntity<?> editCustomerDetails(@RequestHeader("Authorization") String authHeader, @RequestBody CustomerRequest customerRequest) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -60,6 +64,7 @@ public class CustomerController {
         return ResponseEntity.ok(updatedCustomer);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_IDCUSTOMER')")
     @GetMapping("/get-id-customer")
     public ResponseEntity<?> getCustomerId(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

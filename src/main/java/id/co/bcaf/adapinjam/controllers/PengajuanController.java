@@ -18,6 +18,7 @@ public class PengajuanController {
     @Autowired
     private PengajuanService pengajuanService;
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
     public ResponseEntity<?> createPengajuan(@RequestBody PengajuanRequest request) {
         PengajuanResponse response = pengajuanService.createPengajuan(
@@ -29,6 +30,7 @@ public class PengajuanController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_PENGAJUAN')")
     @PostMapping("/review")
     public ResponseEntity<?> review(@RequestBody ReviewRequest request) {
         pengajuanService.reviewPengajuan(request.getPengajuanId(), request.getEmployeeId(), request.isApproved(), request.getCatatan());
@@ -48,6 +50,7 @@ public class PengajuanController {
         return ResponseEntity.ok(list);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_REVIEW_HISTORY')")
     @GetMapping("/review-history/{employeeId}")
     public ResponseEntity<?> getReviewHistory(@PathVariable UUID employeeId) {
         List<ReviewHistoryResponse> history = pengajuanService.getReviewHistoryByEmployee(employeeId);

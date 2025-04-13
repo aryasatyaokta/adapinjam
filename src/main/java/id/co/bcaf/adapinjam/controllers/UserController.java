@@ -4,6 +4,7 @@ import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_USERS')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
@@ -33,6 +35,7 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_USERS')")
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         return userService.updateUser(id, userDetails)
