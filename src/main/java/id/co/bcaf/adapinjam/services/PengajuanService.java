@@ -243,27 +243,43 @@ public class PengajuanService {
 
         // Memfilter pengajuan berdasarkan status yang relevan untuk role ini
         return links.stream().map(link -> {
-                    Pengajuan pengajuan = link.getPengajuan();
-                    String status = pengajuan.getStatus();
+            Pengajuan pengajuan = link.getPengajuan();
+            String status = pengajuan.getStatus();
 
-                    // Pastikan pengajuan hanya dikembalikan jika statusnya sesuai dengan peran employee
-                    if (isStatusValidForRole(status, employeeRole)) {
-                        String catatan = link.getCatatan();
+            if (isStatusValidForRole(status, employeeRole)) {
+                String catatan = link.getCatatan();
+                UserCustomer customer = pengajuan.getCustomer();
+                User user = customer.getUser(); // Get the User (customer) associated with UserCustomer
 
-                        return new ReviewHistoryResponse(
-                                pengajuan.getId(),
-                                pengajuan.getAmount(),
-                                pengajuan.getTenor(),
-                                pengajuan.getBunga(),
-                                pengajuan.getAngsuran(),
-                                pengajuan.getStatus(),
-                                catatan
-                        );
-                    }
-                    return null;  // Jika status tidak valid untuk role, kembalikan null
-                })
-                .filter(Objects::nonNull) // Filter null values
-                .collect(Collectors.toList());
+                // Create CustomerInfo with relevant customer details
+                ReviewHistoryResponse.CustomerInfo customerInfo = new ReviewHistoryResponse.CustomerInfo(
+                        user.getName(), // Nama customer from User model
+                        customer.getPekerjaan(),
+                        customer.getGaji(),
+                        customer.getNoRek(),
+                        customer.getStatusRumah(),
+                        customer.getNik(),
+                        customer.getTempatTglLahir(),
+                        customer.getNoTelp(),
+                        customer.getAlamat(),
+                        customer.getNamaIbuKandung(),
+                        customer.getSisaPlafon()
+                );
+
+                return new ReviewHistoryResponse(
+                        pengajuan.getId(),
+                        pengajuan.getAmount(),
+                        pengajuan.getTenor(),
+                        pengajuan.getBunga(),
+                        pengajuan.getAngsuran(),
+                        pengajuan.getStatus(),
+                        catatan,
+                        customerInfo
+                );
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
     }
 
     private boolean isStatusValidForRole(String status, int roleId) {

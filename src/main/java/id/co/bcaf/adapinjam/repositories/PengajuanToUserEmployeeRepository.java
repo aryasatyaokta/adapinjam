@@ -14,5 +14,5 @@ public interface PengajuanToUserEmployeeRepository extends JpaRepository<Pengaju
     List<PengajuanToUserEmployee> findByUserEmployeeIdAndPengajuanStatus(UUID employeeId, String status);
     List<PengajuanToUserEmployee> findByPengajuanId(UUID pengajuanId);
     List<PengajuanToUserEmployee> findByUserEmployeeId(UUID employeeId);
-
+    List<PengajuanToUserEmployee> findByUserEmployee_Id(UUID userEmployeeId);
 }

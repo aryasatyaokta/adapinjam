@@ -2,7 +2,9 @@ package id.co.bcaf.adapinjam.controllers;
 
 import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.Pengajuan;
+import id.co.bcaf.adapinjam.models.PengajuanToUserEmployee;
 import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.PengajuanToUserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.services.PengajuanService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
@@ -29,6 +31,8 @@ public class PengajuanController {
     private PengajuanService pengajuanService;
     @Autowired
     private UserEmployeeRepository userEmployeeRepo;
+    @Autowired
+    private PengajuanToUserEmployeeRepository pengajuanUserRepo;
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
@@ -45,12 +49,44 @@ public class PengajuanController {
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_PENGAJUAN')")
     @PostMapping("/review")
-    public ResponseEntity<?> review(@RequestBody ReviewRequest request) {
-        pengajuanService.reviewPengajuan(request.getPengajuanId(), request.getEmployeeId(), request.isApproved(), request.getCatatan());
+    public ResponseEntity<?> review(@RequestBody ReviewRequest request, Authentication authentication) {
+        // Ambil employeeId dari token
+        String username = authentication.getName(); // Asumsikan username = email
+        UserEmployee employee = userEmployeeRepo.findByUserEmail(username)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        // Ambil role dan cari pengajuan yang statusnya sesuai bucket
+        int roleId = employee.getUser().getRole().getId();
+
+        // Tentukan status bucket saat ini berdasarkan role
+        String currentBucket = switch (roleId) {
+            case 4 -> "BCKT_MARKETING";
+            case 3 -> "BCKT_BRANCHMANAGER";
+            case 2 -> "BCKT_BACKOFFICE";
+            default -> throw new RuntimeException("Invalid role");
+        };
+
+        // Cari pengajuan yang masuk bucket tersebut dan ditugaskan ke employee ini
+        List<PengajuanToUserEmployee> links;
+        links = pengajuanUserRepo.findByUserEmployee_Id(employee.getId());
+        Optional<PengajuanToUserEmployee> currentLink = links.stream()
+                .filter(link -> link.getPengajuan().getStatus().equals(currentBucket))
+                .findFirst();
+
+        if (currentLink.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Tidak ada pengajuan yang sedang masuk ke bucket Anda");
+        }
+
+        UUID pengajuanId = currentLink.get().getPengajuan().getId();
+
+        // Panggil service seperti biasa
+        pengajuanService.reviewPengajuan(pengajuanId, employee.getId(), request.isApproved(), request.getCatatan());
+
         return ResponseEntity.ok("Review success");
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FEATURE_GET_IDPENGAJUAN_CUSTOMER')")
+    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FEATURE_GET_IDPENGAJUAN_CUSTOMER')")
     @GetMapping("/history/{customerId}")
     public ResponseEntity<?> getHistoryPengajuanByCustomer(@PathVariable UUID customerId) {
         List<PengajuanHistoryResponse> historyList = pengajuanService.getPengajuanHistoryByCustomer(customerId);
