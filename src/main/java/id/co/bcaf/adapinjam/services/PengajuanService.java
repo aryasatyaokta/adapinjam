@@ -4,14 +4,8 @@ import id.co.bcaf.adapinjam.dtos.PengajuanHistoryResponse;
 import id.co.bcaf.adapinjam.dtos.PengajuanResponse;
 import id.co.bcaf.adapinjam.dtos.PengajuanWithNotesResponse;
 import id.co.bcaf.adapinjam.dtos.ReviewHistoryResponse;
-import id.co.bcaf.adapinjam.models.Pengajuan;
-import id.co.bcaf.adapinjam.models.PengajuanToUserEmployee;
-import id.co.bcaf.adapinjam.models.UserCustomer;
-import id.co.bcaf.adapinjam.models.UserEmployee;
-import id.co.bcaf.adapinjam.repositories.CustomerRepository;
-import id.co.bcaf.adapinjam.repositories.PengajuanRepository;
-import id.co.bcaf.adapinjam.repositories.PengajuanToUserEmployeeRepository;
-import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
+import id.co.bcaf.adapinjam.models.*;
+import id.co.bcaf.adapinjam.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,12 +34,15 @@ public class PengajuanService {
     @Autowired
     private PinjamanService pinjamanService;
 
+    @Autowired
+    private BranchRepository branchRepository;
+
     public List<Pengajuan> getPengajuanByCustomerId(UUID customerId) {
         return pengajuanRepo.findByCustomer_Id(customerId);
     }
 
     @Transactional
-    public PengajuanResponse createPengajuan(UUID customerId, Double amount, Integer tenor, UUID branchId) {
+    public PengajuanResponse createPengajuan(UUID customerId, Double amount, Integer tenor, Double latitude, Double longitude) {
 
         UserCustomer customer = customerRepo.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -53,6 +50,8 @@ public class PengajuanService {
         if (customer.getSisaPlafon() < amount) {
             throw new RuntimeException("Sisa plafon tidak mencukupi untuk pengajuan ini");
         }
+
+        Branch nearestBranch = findNearestBranch(latitude, longitude);
 
         double bunga = customer.getPlafon().getBunga();
         double angsuran = calculateAngsuran(amount, tenor, bunga);
@@ -70,7 +69,7 @@ public class PengajuanService {
         customer.setSisaPlafon(customer.getSisaPlafon() - amount);
         customerRepo.save(customer);
 
-        UserEmployee marketing = userEmployeeRepo.findRandomMarketingByBranch(branchId);
+        UserEmployee marketing = userEmployeeRepo.findRandomMarketingByBranch(nearestBranch.getId());
         if (marketing == null) {
             throw new RuntimeException("No marketing available for this branch");
         }
@@ -195,6 +194,29 @@ public class PengajuanService {
         return Math.round(rawAngsuran * 100.0) / 100.0;
     }
 
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius bumi dalam km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    private Branch findNearestBranch(double customerLat, double customerLon) {
+        List<Branch> allBranches = branchRepository.findAll();
+
+        return allBranches.stream()
+                .min((b1, b2) -> {
+                    double dist1 = calculateDistance(customerLat, customerLon, b1.getLatitude(), b1.getLongitude());
+                    double dist2 = calculateDistance(customerLat, customerLon, b2.getLatitude(), b2.getLongitude());
+                    return Double.compare(dist1, dist2);
+                })
+                .orElseThrow(() -> new RuntimeException("No branches found"));
+    }
+
     public List<PengajuanWithNotesResponse> getPengajuanToReviewByEmployee(UUID employeeId) {
         List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByUserEmployeeId(employeeId);
 
@@ -211,7 +233,6 @@ public class PengajuanService {
     }
 
     public List<ReviewHistoryResponse> getReviewHistoryByEmployee(UUID employeeId) {
-        // Ambil semua pengajuan yang pernah ditinjau oleh employeeId
         List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByUserEmployeeId(employeeId);
 
         // Ambil role ID dari employee yang sedang mengakses

@@ -18,4 +18,11 @@ public class Branch {
 
     @Column(name = "name_branch", nullable = false)
     private String branch;
+
+    @Column(name = "latitude", nullable = false)
+    private Double latitude;
+
+    @Column(name = "longitude", nullable = false)
+    private Double longitude;
+
 }

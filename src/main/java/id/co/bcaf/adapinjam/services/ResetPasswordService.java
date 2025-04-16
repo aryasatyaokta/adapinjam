@@ -1,8 +1,10 @@
 package id.co.bcaf.adapinjam.services;
 
+import id.co.bcaf.adapinjam.models.Notification;
 import id.co.bcaf.adapinjam.models.PasswordResetRequest;
 import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.NotificationRepository;
 import id.co.bcaf.adapinjam.repositories.PasswordResetRequestRepository;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
@@ -24,6 +26,7 @@ public class ResetPasswordService {
     private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationRepository notificationRepository;
 
     public String requestResetPassword(String nip) {
         Optional<UserEmployee> userEmployeeOpt = userEmployeeRepository.findByNip(nip);
@@ -34,6 +37,11 @@ public class ResetPasswordService {
         PasswordResetRequest request = new PasswordResetRequest();
         request.setUserEmployee(userEmployeeOpt.get());
         passwordResetRequestRepository.save(request);
+        notificationRepository.save(Notification.builder()
+                .title("Reset Password Request")
+                .message("Karyawan dengan NIP " + nip + " mengajukan reset password.")
+                .build());
+
 
         return "Password reset request submitted to Super Admin";
     }

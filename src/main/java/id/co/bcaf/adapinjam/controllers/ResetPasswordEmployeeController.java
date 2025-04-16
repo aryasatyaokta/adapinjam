@@ -17,7 +17,7 @@ public class ResetPasswordEmployeeController {
     private final ResetPasswordService resetPasswordService;
 
     // Employee mengajukan permintaan reset
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RESET_PASSWORD_EMPLOYEE')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RESET_PASSWORD_EMPLOYEE')")
     @PostMapping("/employee")
     public ResponseEntity<String> forgotPasswordEmployee(@RequestBody Map<String, String> request) {
         String nip = request.get("nip");
@@ -30,14 +30,14 @@ public class ResetPasswordEmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REQUEST_RESETPASS_EMPLOYEE')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REQUEST_RESETPASS_EMPLOYEE')")
     // Super Admin lihat permintaan reset yang belum diproses
     @GetMapping("/admin/requests")
     public ResponseEntity<List<PasswordResetRequest>> getResetRequests() {
         return ResponseEntity.ok(resetPasswordService.getPendingResetRequests());
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PROCESS_SEND_PASSWORD')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PROCESS_SEND_PASSWORD')")
     // Super Admin proses dan kirim password baru
     @PostMapping("/admin/process/{id}")
     public ResponseEntity<String> manualResetPassword(@PathVariable UUID id) {

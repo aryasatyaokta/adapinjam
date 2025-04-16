@@ -46,7 +46,7 @@ public class AuthService {
             User user = optionalUser.get();
             if (passwordEncoder.matches(password, user.getPassword())) { // Hash password checking
                 logger.info("User {} authenticated, generating token...", email);
-                return jwtUtil.generateToken(email, user.getRole().getName_role());
+                return jwtUtil.generateToken(user);
             }
         }
 
@@ -60,7 +60,7 @@ public class AuthService {
         if (optionalUserEmployee.isPresent()) {
             UserEmployee userEmployee = optionalUserEmployee.get();
             if (passwordEncoder.matches(password, userEmployee.getUser().getPassword())) {
-                return jwtUtil.generateToken(userEmployee.getUser().getEmail(), userEmployee.getUser().getRole().getName_role());
+                return jwtUtil.generateToken(userEmployee.getUser());
             }
         }
         return null;

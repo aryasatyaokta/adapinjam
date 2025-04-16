@@ -1,5 +1,6 @@
 package id.co.bcaf.adapinjam.utils;
 
+import id.co.bcaf.adapinjam.models.User;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 
 @Component
@@ -26,17 +28,15 @@ public class JwtUtil {
     }
 
     // Generate Token
-    public String generateToken(String email, String role) {
+
+    public String generateToken(User user) {
         Date issuedAt = new Date();
         Date expiration = new Date(System.currentTimeMillis() + EXPIRATION_TIME);
 
-        System.out.println("Token Generated:");
-        System.out.println("Issued At: " + issuedAt);
-        System.out.println("Expires At: " + expiration);
-
         return Jwts.builder()
-                .setSubject(email)
-                .claim("role", role)
+                .setSubject(user.getEmail())
+                .claim("role", user.getRole().getName_role())
+                .claim("name", user.getName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -97,6 +97,4 @@ public class JwtUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
-
 }

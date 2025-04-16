@@ -18,20 +18,20 @@ public class PinjamanController {
     @Autowired
     private PinjamanService pinjamanService;
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LUNAS_PEMBAYARAN')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LUNAS_PEMBAYARAN')")
     @PostMapping("/{id}/lunas")
     public ResponseEntity<?> markLunas(@PathVariable UUID id) {
         pinjamanService.markAsLunas(id);
         return ResponseEntity.ok("Pinjaman lunas & cek upgrade plafon.");
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PINJAMAN')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PINJAMAN')")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<?> getByCustomer(@PathVariable UUID customerId) {
         return ResponseEntity.ok(pinjamanService.getByCustomerId(customerId));
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PAID_PINJAMAN')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PAID_PINJAMAN')")
     @PostMapping("/bayar/{id}")
     public ResponseEntity<?> bayarPinjaman(
             @PathVariable UUID id,

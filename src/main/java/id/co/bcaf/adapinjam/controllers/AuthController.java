@@ -27,7 +27,7 @@ public class AuthController {
     private TokenBlacklistService tokenBlacklistService;
 
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_CUSTOMER')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_CUSTOMER')")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         String token = authService.authenticateUser(authRequest.getUsername(), authRequest.getPassword());
@@ -47,7 +47,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing or invalid Authorization header");
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_PASSWORD')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_PASSWORD')")
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(
             @RequestHeader("Authorization") String authHeader,
@@ -67,7 +67,7 @@ public class AuthController {
         }
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REGISTER_CUSTOMER')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REGISTER_CUSTOMER')")
     @PostMapping("/register-customer")
     public ResponseEntity<AuthResponse> registerCustomer(@RequestBody RegisterRequest registerRequest) {
         try {
@@ -86,7 +86,7 @@ public class AuthController {
         }
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -98,7 +98,7 @@ public class AuthController {
         return ResponseEntity.badRequest().body("Invalid or missing Authorization header");
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_EMPLOYEE')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_EMPLOYEE')")
     @PostMapping("/login-employee")
     public ResponseEntity<?> loginEmployee(@RequestBody AuthRequest authRequest) {
         String token = authService.authenticateUserEmployee(authRequest.getUsername(), authRequest.getPassword());
@@ -108,7 +108,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid NIP or password");
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FORGOT_PASSWORD_CUSTOMER')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FORGOT_PASSWORD_CUSTOMER')")
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -120,7 +120,7 @@ public class AuthController {
         }
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RESET_PASSWORD_CUSTOMER')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RESET_PASSWORD_CUSTOMER')")
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> request) {
         String token = request.get("token");

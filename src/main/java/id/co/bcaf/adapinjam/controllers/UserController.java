@@ -18,7 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_USERS')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_USERS')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_USERS')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_USERS')")
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User userDetails) {
         return userService.updateUser(id, userDetails)

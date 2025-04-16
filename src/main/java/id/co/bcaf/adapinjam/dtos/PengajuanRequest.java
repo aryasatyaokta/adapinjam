@@ -12,5 +12,7 @@ public class PengajuanRequest {
     private UUID customerId;
     private Double amount;
     private Integer tenor;
-    private UUID branchId;
+    private Double latitude;
+    private Double longitude;
+
 }
