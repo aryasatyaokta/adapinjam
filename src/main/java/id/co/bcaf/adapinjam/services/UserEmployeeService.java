@@ -40,6 +40,10 @@ public class UserEmployeeService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    public Optional<UserEmployee> getByUserEmail(String email) {
+        return userEmployeeRepository.findByUserEmail(email);
+    }
+
     public UserEmployee addUserEmployee(UserEmployee userEmployee) {
         // Get Role by ID (assuming role is passed in the request body as roleId)
         Integer roleId = userEmployee.getUser().getRole().getId();

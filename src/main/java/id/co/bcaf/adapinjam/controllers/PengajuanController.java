@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/pengajuan")
@@ -122,6 +123,41 @@ public class PengajuanController {
         List<ReviewHistoryResponse> history = pengajuanService.getReviewHistoryByEmployee(employeeId);
         return ResponseEntity.ok(history);
     }
+
+    @GetMapping("/my-reviewed-pengajuan")
+    public ResponseEntity<?> getMyReviewedPengajuan() {
+        // Ambil employee dari JWT token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<UserEmployee> optionalEmployee = userEmployeeRepo.findByUserEmail(username);
+        if (optionalEmployee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+        }
+
+        UUID employeeId = optionalEmployee.get().getId();
+
+        // Ambil daftar pengajuan yang pernah direview employee ini
+        List<PengajuanToUserEmployee> reviewedList = pengajuanUserRepo.findByUserEmployeeId(employeeId);
+
+        // Ubah ke response DTO
+        List<MyReviewedPengajuanResponse> responseList = reviewedList.stream()
+                .map(link -> {
+                    Pengajuan pengajuan = link.getPengajuan();
+                    return new MyReviewedPengajuanResponse(
+                            pengajuan.getId(),
+                            pengajuan.getCustomer().getUser().getName(),
+                            pengajuan.getAmount(),
+                            pengajuan.getTenor(),
+                            pengajuan.getStatus(),
+                            pengajuan.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseList);
+    }
+
 
 
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,22 +55,24 @@ public class UserEmployeeController {
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BYID')")
     // Endpoint untuk mendapatkan UserEmployee berdasarkan ID (UUID)
-    @GetMapping("/get/{id}")
-    public ResponseEntity<?> getUserEmployeeById(@PathVariable String id) {
+    @GetMapping("/get-employee")
+    public ResponseEntity<?> getLoggedInUserEmployee() {
         try {
-            UUID uuid = UUID.fromString(id);  // Coba konversi string ke UUID
-            UserEmployee userEmployee = userEmployeeService.getById(uuid)
+            // Ambil username dari token
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            // Cari user by username/email
+            UserEmployee userEmployee = userEmployeeService.getByUserEmail(username)
                     .orElseThrow(() -> new RuntimeException("UserEmployee not found"));
+
             return ResponseEntity.ok(userEmployee);
-        } catch (IllegalArgumentException e) {
-            // Handle jika ID tidak valid (bukan UUID)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UUID format");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("UserEmployee not found");
         }
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
+
+    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
     // Endpoint untuk memperbarui UserEmployee
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUserEmployee(@PathVariable String id, @RequestBody UserEmployee updatedData) {
