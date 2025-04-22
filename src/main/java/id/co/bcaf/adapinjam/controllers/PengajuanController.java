@@ -35,7 +35,7 @@ public class PengajuanController {
     @Autowired
     private PengajuanToUserEmployeeRepository pengajuanUserRepo;
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
     public ResponseEntity<?> createPengajuan(@RequestBody PengajuanRequest request) {
         PengajuanResponse response = pengajuanService.createPengajuan(
@@ -48,7 +48,7 @@ public class PengajuanController {
         return ResponseEntity.ok(response);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_PENGAJUAN')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_PENGAJUAN')")
     @PostMapping("/review")
     public ResponseEntity<?> review(@RequestBody ReviewRequest request, Authentication authentication) {
         // Ambil employeeId dari token
@@ -107,6 +107,7 @@ public class PengajuanController {
 //        return ResponseEntity.ok(history);
 //    }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY')")
     @GetMapping("/review-history")
     public ResponseEntity<?> getReviewHistory() {
         // Ambil employeeId dari token JWT
@@ -124,6 +125,7 @@ public class PengajuanController {
         return ResponseEntity.ok(history);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY_BYID')")
     @GetMapping("/my-reviewed-pengajuan")
     public ResponseEntity<?> getMyReviewedPengajuan() {
         // Ambil employee dari JWT token

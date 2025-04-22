@@ -27,4 +27,16 @@ public class PlafonService {
     public Optional<Plafon> getPlafonById(Integer id) {
         return plafonRepository.findById(id);
     }
+
+    public Plafon updatePlafon(Integer id, Plafon updatedPlafon) {
+        Plafon existingPlafon = plafonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plafon dengan ID " + id + " tidak ditemukan"));
+
+        existingPlafon.setJenisPlafon(updatedPlafon.getJenisPlafon());
+        existingPlafon.setJumlahPlafon(updatedPlafon.getJumlahPlafon());
+        existingPlafon.setBunga(updatedPlafon.getBunga());
+
+        return plafonRepository.save(existingPlafon);
+    }
+
 }

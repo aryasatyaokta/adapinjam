@@ -14,6 +14,6 @@ public class Feature {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false, unique = true)
-    private String name_feature;
+    @Column(name = "name_feature", nullable = false, unique = true)
+    private String name;
 }

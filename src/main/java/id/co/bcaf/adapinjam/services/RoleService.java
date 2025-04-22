@@ -28,7 +28,7 @@ public class RoleService {
 
     public Optional<Role> updateRole(Integer id, Role roleDetails) {
         return roleRepository.findById(id).map(role -> {
-            role.setName_role(roleDetails.getName_role());
+            role.setNameRole(roleDetails.getNameRole());
             return roleRepository.save(role);
         });
     }

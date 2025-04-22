@@ -22,7 +22,13 @@ public class CustomerController {
     @Autowired
     private JwtUtil jwtUtil;
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CHECK_PROFILECUST')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_CUSTOMER')")
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllCustomers() {
+        return ResponseEntity.ok(customerService.getAllCustomers());
+    }
+
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CHECK_PROFILE_CUSTOMER')")
     @GetMapping("/check-profile")
     public ResponseEntity<?> checkProfile(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -76,5 +82,31 @@ public class CustomerController {
         UUID customerId = customerService.getCustomerIdByEmail(email);
         return ResponseEntity.ok(customerId);
     }
+
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_CUSTOMER_PROFILE')")
+    @GetMapping("/get-customer")
+    public ResponseEntity<?> getCustomerProfile(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7).trim();
+        String email = jwtUtil.extractEmail(token);
+
+        UserCustomer customer = customerService.getCustomerByToken(email);
+        return ResponseEntity.ok(customer);
+    }
+
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_CUSTOMER_BY_ID')")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCustomerById(@PathVariable UUID id) {
+        try {
+            UserCustomer customer = customerService.getCustomerById(id);
+            return ResponseEntity.ok(customer);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 
 }

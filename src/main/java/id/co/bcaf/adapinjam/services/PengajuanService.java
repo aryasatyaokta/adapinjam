@@ -124,7 +124,7 @@ public class PengajuanService {
             customer.setSisaPlafon(customer.getSisaPlafon() + pengajuan.getAmount());
             customerRepo.save(customer);
 
-            pengajuan.setStatus("REJECT_" + employee.getUser().getRole().getName_role().toUpperCase());
+            pengajuan.setStatus("REJECT_" + employee.getUser().getRole().getNameRole().toUpperCase());
             pengajuanRepo.save(pengajuan);
             return;
         }

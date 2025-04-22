@@ -16,8 +16,7 @@ public class ResetPasswordEmployeeController {
 
     private final ResetPasswordService resetPasswordService;
 
-    // Employee mengajukan permintaan reset
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RESET_PASSWORD_EMPLOYEE')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REQ_RESET_PASSWORD')")
     @PostMapping("/employee")
     public ResponseEntity<String> forgotPasswordEmployee(@RequestBody Map<String, String> request) {
         String nip = request.get("nip");
@@ -30,18 +29,16 @@ public class ResetPasswordEmployeeController {
         return ResponseEntity.ok(response);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REQUEST_RESETPASS_EMPLOYEE')")
-    // Super Admin lihat permintaan reset yang belum diproses
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_REQ_PASSWORD')")
     @GetMapping("/admin/requests")
     public ResponseEntity<List<PasswordResetRequest>> getResetRequests() {
         return ResponseEntity.ok(resetPasswordService.getPendingResetRequests());
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PROCESS_SEND_PASSWORD')")
-    // Super Admin proses dan kirim password baru
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'RES_RESET_PASSWORD')")
     @PostMapping("/admin/process/{id}")
     public ResponseEntity<String> manualResetPassword(@PathVariable UUID id) {
-        String result = resetPasswordService.manualResetPassword(id);
+        String result = resetPasswordService.processPasswordReset(id);
 
         if (result.equals("Reset request not found")) {
             return ResponseEntity.notFound().build();
@@ -52,5 +49,24 @@ public class ResetPasswordEmployeeController {
         }
 
         return ResponseEntity.ok(result);
+    }
+
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'INPUT_NEW_PASSWORD')")
+    // Endpoint untuk employee memasukkan password baru dengan token
+    @PostMapping("/employee/reset/{token}")
+    public ResponseEntity<String> resetPasswordWithToken(@PathVariable String token, @RequestBody Map<String, String> request) {
+        String newPassword = request.get("newPassword");
+        String confirmPassword = request.get("confirmPassword");
+
+        if (!newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest().body("Passwords do not match");
+        }
+
+        String response = resetPasswordService.resetPasswordWithToken(token, newPassword);
+        if (response.equals("Invalid or expired token")) {
+            return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
+
+        return ResponseEntity.ok("Password has been successfully reset");
     }
 }

@@ -29,21 +29,21 @@ public class UserEmployeeController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
-    // Endpoint untuk menambahkan UserEmployee
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
     @PostMapping("/add")
+    // @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
     public ResponseEntity<?> addUserEmployee(@RequestBody UserEmployee userEmployee) {
         try {
-            // Panggil service untuk menambahkan UserEmployee
             UserEmployee createdUserEmployee = userEmployeeService.addUserEmployee(userEmployee);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUserEmployee);
         } catch (Exception e) {
-            // Tangani error jika ada
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error creating UserEmployee: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    "Failed to create UserEmployee: " + e.getMessage()
+            );
         }
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALLEMPLOYEE')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALLEMPLOYEE')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllUserEmployees() {
         List<UserEmployee> employees = userEmployeeService.getAll();
@@ -72,20 +72,22 @@ public class UserEmployeeController {
     }
 
 
-    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
     // Endpoint untuk memperbarui UserEmployee
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUserEmployee(@PathVariable String id, @RequestBody UserEmployee updatedData) {
         try {
             UUID uuid = UUID.fromString(id);  // Coba konversi string ke UUID
-            updatedData.setId(uuid);
-            UserEmployee updatedUserEmployee = userEmployeeService.update(uuid, updatedData)
-                    .orElseThrow(() -> new RuntimeException("UserEmployee not found"));
+            // Memanggil service untuk melakukan pembaruan data
+            UserEmployee updatedUserEmployee = userEmployeeService.update(uuid, updatedData);
+
             return ResponseEntity.ok(updatedUserEmployee);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid UUID format");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("UserEmployee not found: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error updating UserEmployee: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error updating UserEmployee: " + e.getMessage());
         }
     }
 

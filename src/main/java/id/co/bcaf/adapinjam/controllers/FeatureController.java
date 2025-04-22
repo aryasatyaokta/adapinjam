@@ -36,7 +36,7 @@ public class FeatureController {
     @PutMapping("/{id}")
     public ResponseEntity<Feature> updateFeature(@PathVariable int id, @RequestBody Feature updatedFeature) {
         return featureRepository.findById(id).map(feature -> {
-            feature.setName_feature(updatedFeature.getName_feature());
+            feature.setName(updatedFeature.getName());
             featureRepository.save(feature);
             return ResponseEntity.ok(feature);
         }).orElse(ResponseEntity.notFound().build());

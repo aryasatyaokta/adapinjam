@@ -28,29 +28,36 @@ public class ResetPasswordService {
     private final PasswordEncoder passwordEncoder;
     private final NotificationRepository notificationRepository;
 
+    // Employee mengajukan permintaan reset password
     public String requestResetPassword(String nip) {
         Optional<UserEmployee> userEmployeeOpt = userEmployeeRepository.findByNip(nip);
         if (userEmployeeOpt.isEmpty()) {
             return "Employee not found";
         }
 
-        PasswordResetRequest request = new PasswordResetRequest();
-        request.setUserEmployee(userEmployeeOpt.get());
-        passwordResetRequestRepository.save(request);
+        // Create password reset token
+        String token = UUID.randomUUID().toString();
+        PasswordResetRequest resetToken = new PasswordResetRequest(token, userEmployeeOpt.get());
+        passwordResetRequestRepository.save(resetToken);
+
         notificationRepository.save(Notification.builder()
                 .title("Reset Password Request")
                 .message("Karyawan dengan NIP " + nip + " mengajukan reset password.")
                 .build());
 
+        // Send email to employee with reset link containing the token
+        sendResetEmail(userEmployeeOpt.get().getUser().getEmail(), token);
 
         return "Password reset request submitted to Super Admin";
     }
 
+    // Admin melihat request reset yang belum diproses
     public List<PasswordResetRequest> getPendingResetRequests() {
         return passwordResetRequestRepository.findByProcessedFalse();
     }
 
-    public String manualResetPassword(UUID requestId) {
+    // Admin memproses dan mengirimkan token reset password ke email employee
+    public String processPasswordReset(UUID requestId) {
         Optional<PasswordResetRequest> requestOpt = passwordResetRequestRepository.findById(requestId);
         if (requestOpt.isEmpty()) {
             return "Reset request not found";
@@ -58,31 +65,46 @@ public class ResetPasswordService {
 
         PasswordResetRequest request = requestOpt.get();
         UserEmployee employee = request.getUserEmployee();
-        User user = employee.getUser();
+        // Token sudah di-generate pada saat pengajuan reset password
 
-        // Generate password
-        String newPassword = UUID.randomUUID().toString().substring(0, 8);
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        request.setProcessed(true);
+        passwordResetRequestRepository.save(request);
+        return "Password reset token sent to employee email";
+    }
+
+    // Mengirim email dengan link reset password
+    private void sendResetEmail(String toEmail, String token) {
+        String resetUrl = "http://localhost:4200/reset-password/" + token;
 
         try {
-            sendEmail(user.getEmail(), newPassword);
-            request.setProcessed(true);
-            passwordResetRequestRepository.save(request);
-            return "Password reset and sent successfully";
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(toEmail);
+            helper.setSubject("Reset Password Request");
+            helper.setText("Klik link ini untuk mereset password Anda: " + resetUrl, true);
+            mailSender.send(message);
         } catch (Exception e) {
-            return "Failed to send email: " + e.getMessage();
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
 
-    private void sendEmail(String toEmail, String password) throws Exception {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    // Reset password dengan token
+    public String resetPasswordWithToken(String token, String newPassword) {
+        Optional<PasswordResetRequest> tokenOpt = passwordResetRequestRepository.findByToken(token);
+        if (tokenOpt.isEmpty()) {
+            return "Invalid or expired token";
+        }
 
-        helper.setTo(toEmail);
-        helper.setSubject("Password Reset by Admin");
-        helper.setText("Password baru Anda: " + password, true);
+        PasswordResetRequest resetToken = tokenOpt.get();
+        UserEmployee employee = resetToken.getUserEmployee();
+        User user = employee.getUser();
 
-        mailSender.send(message);
+        // Set new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Token dianggap sudah dipakai
+        passwordResetRequestRepository.delete(resetToken);
+        return "Password has been successfully reset";
     }
 }

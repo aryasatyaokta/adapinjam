@@ -20,4 +20,11 @@ public class PasswordResetRequest {
     private boolean processed = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private String token;
+
+    public PasswordResetRequest(String token, UserEmployee userEmployee) {
+        this.token = token;
+        this.userEmployee = userEmployee;
+    }
 }

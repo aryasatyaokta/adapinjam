@@ -34,6 +34,6 @@ public class FeatureAccessPermission {
         List<Feature> allowedFeatures = roleToFeatureRepository.findFeaturesByRoleId(user.getRole().getId());
 
         return allowedFeatures.stream()
-                .anyMatch(f -> f.getName_feature().equalsIgnoreCase(featureName));
+                .anyMatch(f -> f.getName().equalsIgnoreCase(featureName));
     }
 }

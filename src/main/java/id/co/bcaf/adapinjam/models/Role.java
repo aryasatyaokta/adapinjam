@@ -15,11 +15,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String name_role;
+    @Column(name="role_name",nullable = false, unique = true, length = 50)
+    private String nameRole;
 
     public Role(Integer id, String customer) {
         this.id = id;
-        this.name_role = customer;
+        this.nameRole = customer;
     }
 }

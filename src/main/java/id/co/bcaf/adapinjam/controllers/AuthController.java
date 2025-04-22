@@ -47,7 +47,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing or invalid Authorization header");
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_PASSWORD')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_PASSWORD')")
     @PutMapping("/update-password")
     public ResponseEntity<String> updatePassword(
             @RequestHeader("Authorization") String authHeader,
@@ -86,7 +86,7 @@ public class AuthController {
         }
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

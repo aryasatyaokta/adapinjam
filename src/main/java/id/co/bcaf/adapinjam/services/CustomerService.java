@@ -10,6 +10,7 @@ import id.co.bcaf.adapinjam.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +24,10 @@ public class CustomerService {
 
     @Autowired
     private PlafonRepository plafonRepository;
+
+    public List<UserCustomer> getAllCustomers() {
+        return customerRepository.findAll();
+    }
 
     public boolean isProfileComplete(String email) {
         User user = userRepository.findByEmail(email)
@@ -88,5 +93,18 @@ public class CustomerService {
         return customerRepository.findByUser(user)
                 .map(UserCustomer::getId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
+
+    public UserCustomer getCustomerByToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return customerRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
+
+    public UserCustomer getCustomerById(UUID id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + id));
     }
 }
