@@ -53,7 +53,7 @@ public class UserEmployeeController {
         return ResponseEntity.ok(employees);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BYID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BYID')")
     // Endpoint untuk mendapatkan UserEmployee berdasarkan ID (UUID)
     @GetMapping("/get-employee")
     public ResponseEntity<?> getLoggedInUserEmployee() {
@@ -70,7 +70,6 @@ public class UserEmployeeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("UserEmployee not found");
         }
     }
-
 
     @PreAuthorize("@accessPermission.hasAccess(authentication, 'UPDATE_EMPLOYEE')")
     // Endpoint untuk memperbarui UserEmployee

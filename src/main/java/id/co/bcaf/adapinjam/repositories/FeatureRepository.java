@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface FeatureRepository extends JpaRepository<Feature, Integer> {
     Optional<Feature> findByName(String name);
+
 }

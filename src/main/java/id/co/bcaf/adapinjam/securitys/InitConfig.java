@@ -50,6 +50,7 @@ public class InitConfig {
             featureToRoles.put("REVIEW_PENGAJUAN", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("REVIEW_HISTORY", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("REVIEW_HISTORY_BYID", List.of("Marketing", "Branch Manager", "Back Office"));
+            featureToRoles.put("GET_EMPLOYEE_BYID", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("CREATE_PLAFON", List.of("Super Admin"));
             featureToRoles.put("GET_PLAFON", List.of("Super Admin"));
             featureToRoles.put("GET_BYID_PLAFON", List.of("Super Admin"));
@@ -58,6 +59,10 @@ public class InitConfig {
             featureToRoles.put("ADD_EMPLOYEE", List.of("Super Admin"));
             featureToRoles.put("GET_ALLEMPLOYEE", List.of("Super Admin"));
             featureToRoles.put("UPDATE_EMPLOYEE", List.of("Super Admin"));
+            featureToRoles.put("GET_ROLES_FEATURES", List.of("Super Admin"));
+            featureToRoles.put("ADD_ROLES_FEATURES", List.of("Super Admin"));
+            featureToRoles.put("UPDATE_ROLES_FEATURES", List.of("Super Admin"));
+            featureToRoles.put("GET_ROLES", List.of("Super Admin"));
             // Inisialisasi fitur dan relasi ke role
             for (Map.Entry<String, List<String>> entry : featureToRoles.entrySet()) {
                 String featureName = entry.getKey();

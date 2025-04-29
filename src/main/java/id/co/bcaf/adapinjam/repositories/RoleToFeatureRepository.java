@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import id.co.bcaf.adapinjam.models.Role;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RoleToFeatureRepository extends JpaRepository<RoleToFeature, Integer> {
@@ -17,4 +18,12 @@ public interface RoleToFeatureRepository extends JpaRepository<RoleToFeature, In
 
     @Query("SELECT rf.feature FROM RoleToFeature rf WHERE rf.role.id = :idRole")
     List<Feature> findFeaturesByRoleId(@Param("idRole") int idRole);
+
+    List<RoleToFeature> findByRoleId(Integer roleId);
+
+    Optional<RoleToFeature> findByRoleIdAndFeatureId(Integer roleId, Integer featureId);
+
+    void deleteByRole(Role role);
+
 }
+
