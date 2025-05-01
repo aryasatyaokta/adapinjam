@@ -35,7 +35,7 @@ public class PengajuanController {
     @Autowired
     private PengajuanToUserEmployeeRepository pengajuanUserRepo;
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
+//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
     public ResponseEntity<?> createPengajuan(@RequestBody PengajuanRequest request) {
         PengajuanResponse response = pengajuanService.createPengajuan(
@@ -61,9 +61,9 @@ public class PengajuanController {
 
         // Tentukan status bucket saat ini berdasarkan role
         String currentBucket = switch (roleId) {
-            case 4 -> "BCKT_MARKETING";
+            case 2 -> "BCKT_MARKETING";
             case 3 -> "BCKT_BRANCHMANAGER";
-            case 2 -> "BCKT_BACKOFFICE";
+            case 4 -> "BCKT_BACKOFFICE";
             default -> throw new RuntimeException("Invalid role");
         };
 
@@ -125,7 +125,7 @@ public class PengajuanController {
         return ResponseEntity.ok(history);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY_BYID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY_BY_ID')")
     @GetMapping("/my-reviewed-pengajuan")
     public ResponseEntity<?> getMyReviewedPengajuan() {
         // Ambil employee dari JWT token

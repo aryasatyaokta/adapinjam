@@ -25,7 +25,7 @@ public class RoleController {
     @Autowired
     private RoleToFeatureService roleToFeatureService;
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ROLES')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_ROLES')")
     @GetMapping
     public List<Role> getAllRoles() {
         return roleService.getAllRoles();
@@ -44,7 +44,7 @@ public class RoleController {
         return features.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(features);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_ROLES_FEATURES')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_ROLES_FEATURES')")
     @PostMapping("/add")
     public ResponseEntity<String> addRole(@RequestBody CreateRoleRequest createRoleRequest) {
         roleToFeatureService.addRoleWithFeatures(createRoleRequest);

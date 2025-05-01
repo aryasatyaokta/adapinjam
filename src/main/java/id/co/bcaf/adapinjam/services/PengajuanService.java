@@ -110,9 +110,9 @@ public class PengajuanService {
         int employeeRole = employee.getUser().getRole().getId();
 
         boolean isRoleValid =
-                (status.equals("BCKT_MARKETING") && employeeRole == 4) ||
+                (status.equals("BCKT_MARKETING") && employeeRole == 2) ||
                         (status.equals("BCKT_BRANCHMANAGER") && employeeRole == 3) ||
-                        (status.equals("BCKT_BACKOFFICE") && employeeRole == 2);
+                        (status.equals("BCKT_BACKOFFICE") && employeeRole == 4);
 
         if (!isRoleValid) {
             throw new RuntimeException("You do not have permission to review this pengajuan in this status");
@@ -161,15 +161,12 @@ public class PengajuanService {
         if (isApproved) {
             int nextRoleId = switch (pengajuan.getStatus()) {
                 case "BCKT_BRANCHMANAGER" -> 3;
-                case "BCKT_BACKOFFICE" -> 2;
+                case "BCKT_BACKOFFICE" -> 4;
                 default -> 0;
             };
             if (nextRoleId > 0) assignToNextReviewer(pengajuan, nextRoleId);
         }
     }
-
-
-
     private void assignToNextReviewer(Pengajuan pengajuan, int roleId) {
         List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByPengajuanId(pengajuan.getId());
         if (links.isEmpty()) throw new RuntimeException("No UserEmployee assigned to pengajuan");
@@ -285,11 +282,11 @@ public class PengajuanService {
     private boolean isStatusValidForRole(String status, int roleId) {
         // Pastikan status sesuai dengan peran masing-masing
         switch (roleId) {
-            case 4: // Marketing
+            case 2: // Marketing
                 return status.equals("BCKT_MARKETING");
             case 3: // Branch Manager
                 return status.equals("BCKT_BRANCHMANAGER");
-            case 2: // Back Office
+            case 4: // Back Office
                 return status.equals("BCKT_BACKOFFICE");
             default:
                 return false;

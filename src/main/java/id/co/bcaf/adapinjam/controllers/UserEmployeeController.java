@@ -29,7 +29,7 @@ public class UserEmployeeController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_EMPLOYEE')")
     @PostMapping("/add")
     // @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_EMPLOYEE')")
     public ResponseEntity<?> addUserEmployee(@RequestBody UserEmployee userEmployee) {
@@ -43,7 +43,7 @@ public class UserEmployeeController {
         }
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALLEMPLOYEE')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_EMPLOYEE')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllUserEmployees() {
         List<UserEmployee> employees = userEmployeeService.getAll();
@@ -53,7 +53,7 @@ public class UserEmployeeController {
         return ResponseEntity.ok(employees);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BYID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BY_ID')")
     // Endpoint untuk mendapatkan UserEmployee berdasarkan ID (UUID)
     @GetMapping("/get-employee")
     public ResponseEntity<?> getLoggedInUserEmployee() {

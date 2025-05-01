@@ -35,7 +35,7 @@ public class BranchController {
         return ResponseEntity.ok(branches);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_BYID_BRANCH')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_BRANCH_BY_ID')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@RequestHeader("Authorization") String authHeader,
                                      @PathVariable UUID id) {

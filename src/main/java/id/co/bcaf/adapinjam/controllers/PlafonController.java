@@ -23,14 +23,14 @@ public class PlafonController {
         return ResponseEntity.ok(savedPlafon);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PLAFON')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_PLAFON')")
     @GetMapping
     public ResponseEntity<List<Plafon>> getAllPlafons(){
         List<Plafon> plafons = plafonService.getAllPlafons();
         return ResponseEntity.ok(plafons);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_BYID_PLAFON')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PLAFON_BY_ID')")
     @GetMapping("/{id}")
     public ResponseEntity<Plafon> getPlafonById(@PathVariable Integer id) {
         return plafonService.getPlafonById(id)
