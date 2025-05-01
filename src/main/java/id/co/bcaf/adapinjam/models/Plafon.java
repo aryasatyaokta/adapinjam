@@ -23,4 +23,7 @@ public class Plafon {
 
     @Column(name = "bunga", nullable = false)
     private Double bunga;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }

@@ -1,8 +1,10 @@
 package id.co.bcaf.adapinjam.dtos;
-
+import id.co.bcaf.adapinjam.dtos.ReviewNoteInfo;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -10,35 +12,31 @@ import java.util.UUID;
 public class ReviewHistoryResponse {
     private UUID pengajuanId;
     private Double amount;
-    private Integer tenor;
-    private Double bunga;
+    private int tenor;
+    private double bunga;
     private Double angsuran;
     private String status;
-    private String catatan;
-
-    // Customer info as a nested object
     private CustomerInfo customer;
+    private List<ReviewNoteInfo> reviewNotes;
 
-    public ReviewHistoryResponse(
-            UUID pengajuanId, Double amount, Integer tenor, Double bunga,
-            Double angsuran, String status, String catatan,
-            CustomerInfo customer
-    ) {
+    public ReviewHistoryResponse(UUID pengajuanId, Double amount, int tenor, double bunga, Double angsuran,
+                                 String status, CustomerInfo customer,
+                                 List<ReviewNoteInfo> reviewNotes) {
         this.pengajuanId = pengajuanId;
         this.amount = amount;
         this.tenor = tenor;
         this.bunga = bunga;
         this.angsuran = angsuran;
         this.status = status;
-        this.catatan = catatan;
         this.customer = customer;
+        this.reviewNotes = reviewNotes;
     }
 
-    // Nested CustomerInfo class
+    // Getters & Setters
     @Getter
     @Setter
     public static class CustomerInfo {
-        private String namaCustomer;
+        private String nama;
         private String pekerjaan;
         private String gaji;
         private String noRek;
@@ -50,10 +48,10 @@ public class ReviewHistoryResponse {
         private String namaIbuKandung;
         private Double sisaPlafon;
 
-        public CustomerInfo(String namaCustomer, String pekerjaan, String gaji, String noRek,
-                            String statusRumah, String nik, String tempatTglLahir, String noTelp,
-                            String alamat, String namaIbuKandung, Double sisaPlafon) {
-            this.namaCustomer = namaCustomer;
+        public CustomerInfo(String nama, String pekerjaan, String gaji, String noRek, String statusRumah,
+                            String nik, String tempatTglLahir, String noTelp, String alamat,
+                            String namaIbuKandung, Double sisaPlafon) {
+            this.nama = nama;
             this.pekerjaan = pekerjaan;
             this.gaji = gaji;
             this.noRek = noRek;
@@ -65,6 +63,7 @@ public class ReviewHistoryResponse {
             this.namaIbuKandung = namaIbuKandung;
             this.sisaPlafon = sisaPlafon;
         }
+
+        // Getters & Setters
     }
 }
-

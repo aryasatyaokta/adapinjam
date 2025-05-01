@@ -45,4 +45,11 @@ public class PlafonController {
         return ResponseEntity.ok(updated);
     }
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'DELETE_PLAFON')")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> softDeletePlafon(@PathVariable Integer id) {
+        plafonService.softDeletePlafon(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -53,6 +53,7 @@ public class InitConfig {
             featureToRoles.put("GET_ALL_PLAFON", List.of("Super Admin"));
             featureToRoles.put("GET_PLAFON_BY_ID", List.of("Super Admin"));
             featureToRoles.put("UPDATE_PLAFON", List.of("Super Admin"));
+            featureToRoles.put("DELETE_PLAFON", List.of("Super Admin"));
             featureToRoles.put("REQ_RESET_PASSWORD", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("CREATE_EMPLOYEE", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_EMPLOYEE", List.of("Super Admin"));

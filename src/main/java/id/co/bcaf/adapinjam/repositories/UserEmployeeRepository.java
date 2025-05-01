@@ -26,14 +26,17 @@ public interface UserEmployeeRepository extends JpaRepository<UserEmployee, UUID
 //    }
 
     @Query("""
-        SELECT e FROM UserEmployee e
-        WHERE e.branch.id = :branchId AND e.user.role.id = 2
-        ORDER BY (
-            SELECT COUNT(p.id) FROM PengajuanToUserEmployee p WHERE p.userEmployee.id = e.id
-        ), e.user.name ASC
-        LIMIT 1
-    """)
+    SELECT e FROM UserEmployee e
+    WHERE e.branch.id = :branchId 
+      AND e.user.role.id = 2
+      AND e.statusEmployee = 'ACTIVE'
+    ORDER BY (
+        SELECT COUNT(p.id) FROM PengajuanToUserEmployee p WHERE p.userEmployee.id = e.id
+    ), e.user.name ASC
+    LIMIT 1
+""")
     UserEmployee findRandomMarketingByBranch(@Param("branchId") UUID branchId);
+
 
     List<UserEmployee> findByBranchIdAndUserRoleId(UUID branchId, Integer roleId);
 

@@ -1,9 +1,6 @@
 package id.co.bcaf.adapinjam.services;
 
-import id.co.bcaf.adapinjam.dtos.PengajuanHistoryResponse;
-import id.co.bcaf.adapinjam.dtos.PengajuanResponse;
-import id.co.bcaf.adapinjam.dtos.PengajuanWithNotesResponse;
-import id.co.bcaf.adapinjam.dtos.ReviewHistoryResponse;
+import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.*;
 import id.co.bcaf.adapinjam.repositories.*;
 import jakarta.transaction.Transactional;
@@ -11,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -119,7 +113,6 @@ public class PengajuanService {
         }
 
         if (!isApproved) {
-            // Restore sisa plafon
             UserCustomer customer = pengajuan.getCustomer();
             customer.setSisaPlafon(customer.getSisaPlafon() + pengajuan.getAmount());
             customerRepo.save(customer);
@@ -132,15 +125,15 @@ public class PengajuanService {
         switch (status) {
             case "BCKT_MARKETING" -> {
                 pengajuan.setStatus("BCKT_BRANCHMANAGER");
-                pengajuan.setMarketingApprovedAt(LocalDateTime.now());  // Set tanggal approval Marketing
+                pengajuan.setMarketingApprovedAt(LocalDateTime.now());
             }
             case "BCKT_BRANCHMANAGER" -> {
                 pengajuan.setStatus("BCKT_BACKOFFICE");
-                pengajuan.setBranchManagerApprovedAt(LocalDateTime.now());  // Set tanggal approval Branch Manager
+                pengajuan.setBranchManagerApprovedAt(LocalDateTime.now());
             }
             case "BCKT_BACKOFFICE" -> {
                 pengajuan.setStatus("DISBURSEMENT");
-                pengajuan.setBackOfficeApprovedAt(LocalDateTime.now());  // Set tanggal approval Back Office
+                pengajuan.setBackOfficeApprovedAt(LocalDateTime.now());
                 pengajuanRepo.save(pengajuan);
 
                 // Simpan sebagai history pinjaman
@@ -156,8 +149,6 @@ public class PengajuanService {
         }
 
         pengajuanRepo.save(pengajuan);
-
-        // Assign ke reviewer berikutnya jika disetujui
         if (isApproved) {
             int nextRoleId = switch (pengajuan.getStatus()) {
                 case "BCKT_BRANCHMANAGER" -> 3;
@@ -177,8 +168,7 @@ public class PengajuanService {
         List<UserEmployee> candidates = userEmployeeRepo.findByBranchIdAndUserRoleId(branchId, roleId);
         if (candidates.isEmpty()) throw new RuntimeException("No reviewer available for next role");
 
-        UserEmployee selected = candidates.get(0); // implementasi sederhana, bisa dibuat lebih optimal
-
+        UserEmployee selected = candidates.get(0);
         PengajuanToUserEmployee newLink = new PengajuanToUserEmployee();
         newLink.setPengajuan(pengajuan);
         newLink.setUserEmployee(selected);
@@ -219,10 +209,10 @@ public class PengajuanService {
 
         return links.stream().map(link -> {
             Pengajuan pengajuan = link.getPengajuan();
-            UserCustomer customer = pengajuan.getCustomer();  // Ambil data customer
+            UserCustomer customer = pengajuan.getCustomer();
             List<String> catatanList = pengajuanUserRepo.findByPengajuanId(pengajuan.getId()).stream()
                     .map(PengajuanToUserEmployee::getCatatan)
-                    .filter(catatan -> catatan != null)  // Menghindari null
+                    .filter(catatan -> catatan != null)
                     .collect(Collectors.toList());
 
             return new PengajuanWithNotesResponse(pengajuan, customer, catatanList);
@@ -232,61 +222,92 @@ public class PengajuanService {
     public List<ReviewHistoryResponse> getReviewHistoryByEmployee(UUID employeeId) {
         List<PengajuanToUserEmployee> links = pengajuanUserRepo.findByUserEmployeeId(employeeId);
 
-        // Ambil role ID dari employee yang sedang mengakses
         UserEmployee employee = userEmployeeRepo.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+        int employeeRole = employee.getUser().getRole().getId();
 
-        int employeeRole = employee.getUser().getRole().getId(); // Role ID: 2 (Back Office), 3 (Branch Manager), 4 (Marketing)
+        return links.stream()
+                .map(link -> {
+                    Pengajuan pengajuan = link.getPengajuan();
+                    String status = pengajuan.getStatus();
 
-        // Memfilter pengajuan berdasarkan status yang relevan untuk role ini
-        return links.stream().map(link -> {
-            Pengajuan pengajuan = link.getPengajuan();
-            String status = pengajuan.getStatus();
+                    if (!isStatusValidForRole(status, employeeRole)) {
+                        return null;
+                    }
 
-            if (isStatusValidForRole(status, employeeRole)) {
-                String catatan = link.getCatatan();
-                UserCustomer customer = pengajuan.getCustomer();
-                User user = customer.getUser(); // Get the User (customer) associated with UserCustomer
+                    if (!isValidBucketForRole(status, employeeRole)) {
+                        return null;
+                    }
 
-                // Create CustomerInfo with relevant customer details
-                ReviewHistoryResponse.CustomerInfo customerInfo = new ReviewHistoryResponse.CustomerInfo(
-                        user.getName(), // Nama customer from User model
-                        customer.getPekerjaan(),
-                        customer.getGaji(),
-                        customer.getNoRek(),
-                        customer.getStatusRumah(),
-                        customer.getNik(),
-                        customer.getTempatTglLahir(),
-                        customer.getNoTelp(),
-                        customer.getAlamat(),
-                        customer.getNamaIbuKandung(),
-                        customer.getSisaPlafon()
-                );
+                    UserCustomer customer = pengajuan.getCustomer();
+                    User user = customer.getUser();
 
-                return new ReviewHistoryResponse(
-                        pengajuan.getId(),
-                        pengajuan.getAmount(),
-                        pengajuan.getTenor(),
-                        pengajuan.getBunga(),
-                        pengajuan.getAngsuran(),
-                        pengajuan.getStatus(),
-                        catatan,
-                        customerInfo
-                );
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+                    ReviewHistoryResponse.CustomerInfo customerInfo = new ReviewHistoryResponse.CustomerInfo(
+                            user.getName(), customer.getPekerjaan(), customer.getGaji(),
+                            customer.getNoRek(), customer.getStatusRumah(), customer.getNik(),
+                            customer.getTempatTglLahir(), customer.getNoTelp(), customer.getAlamat(),
+                            customer.getNamaIbuKandung(), customer.getSisaPlafon()
+                    );
 
+                    List<PengajuanToUserEmployee> allReviews = pengajuanUserRepo.findByPengajuanId(pengajuan.getId());
+
+                    List<ReviewNoteInfo> reviewNotes = allReviews.stream()
+                            .map(r -> {
+                                String roleName = r.getUserEmployee().getUser().getRole().getNameRole();
+                                String reviewerName = r.getUserEmployee().getUser().getName();
+                                return new ReviewNoteInfo(roleName, reviewerName, r.getCatatan());
+                            })
+                            .sorted(Comparator.comparingInt(this::getRolePriority))
+                            .collect(Collectors.toList());
+
+                    return new ReviewHistoryResponse(
+                            pengajuan.getId(),
+                            pengajuan.getAmount(),
+                            pengajuan.getTenor(),
+                            pengajuan.getBunga(),
+                            pengajuan.getAngsuran(),
+                            pengajuan.getStatus(),
+                            customerInfo,
+                            reviewNotes
+                    );
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private int getRolePriority(ReviewNoteInfo reviewNote) {
+        switch (reviewNote.getRole()) {
+            case "Marketing":
+                return 1;
+            case "Branch Manager":
+                return 2;
+            case "Back Office":
+                return 3;
+            default:
+                return Integer.MAX_VALUE;
+        }
+    }
+
+    private boolean isValidBucketForRole(String status, int roleId) {
+        switch (roleId) {
+            case 2:
+                return status.equals("BCKT_MARKETING");
+            case 3:
+                return status.equals("BCKT_BRANCHMANAGER") || status.equals("BCKT_MARKETING");
+            case 4: // Back Office
+                return status.equals("BCKT_BACKOFFICE") || status.equals("BCKT_BRANCHMANAGER");
+            default:
+                return false;
+        }
     }
 
     private boolean isStatusValidForRole(String status, int roleId) {
-        // Pastikan status sesuai dengan peran masing-masing
         switch (roleId) {
-            case 2: // Marketing
+            case 2:
                 return status.equals("BCKT_MARKETING");
-            case 3: // Branch Manager
+            case 3:
                 return status.equals("BCKT_BRANCHMANAGER");
-            case 4: // Back Office
+            case 4:
                 return status.equals("BCKT_BACKOFFICE");
             default:
                 return false;

@@ -21,11 +21,12 @@ public class PlafonService {
     }
 
     public List<Plafon> getAllPlafons() {
-        return plafonRepository.findAll();
+        return plafonRepository.findByDeletedFalse();
     }
 
     public Optional<Plafon> getPlafonById(Integer id) {
-        return plafonRepository.findById(id);
+        return plafonRepository.findById(id)
+                .filter(plafon -> !plafon.isDeleted());
     }
 
     public Plafon updatePlafon(Integer id, Plafon updatedPlafon) {
@@ -38,5 +39,14 @@ public class PlafonService {
 
         return plafonRepository.save(existingPlafon);
     }
+
+    public void softDeletePlafon(Integer id) {
+        Plafon plafon = plafonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Plafon dengan ID " + id + " tidak ditemukan"));
+
+        plafon.setDeleted(true);
+        plafonRepository.save(plafon);
+    }
+
 
 }
