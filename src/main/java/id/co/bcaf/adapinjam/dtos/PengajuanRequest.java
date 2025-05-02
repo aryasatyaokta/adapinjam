@@ -9,7 +9,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class PengajuanRequest {
-    private UUID customerId;
     private Double amount;
     private Integer tenor;
     private Double latitude;

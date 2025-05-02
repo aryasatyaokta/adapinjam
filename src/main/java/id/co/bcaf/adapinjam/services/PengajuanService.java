@@ -36,10 +36,7 @@ public class PengajuanService {
     }
 
     @Transactional
-    public PengajuanResponse createPengajuan(UUID customerId, Double amount, Integer tenor, Double latitude, Double longitude) {
-
-        UserCustomer customer = customerRepo.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    public PengajuanResponse createPengajuan(UserCustomer customer, Double amount, Integer tenor, Double latitude, Double longitude) {
 
         if (customer.getSisaPlafon() < amount) {
             throw new RuntimeException("Sisa plafon tidak mencukupi untuk pengajuan ini");
@@ -89,6 +86,7 @@ public class PengajuanService {
                 pengajuan.getBackOfficeApprovedAt()
         );
     }
+
 
     public void reviewPengajuan(UUID pengajuanId, UUID employeeId, boolean isApproved, String catatan) {
         PengajuanToUserEmployee link = pengajuanUserRepo.findByPengajuanIdAndUserEmployeeId(pengajuanId, employeeId)

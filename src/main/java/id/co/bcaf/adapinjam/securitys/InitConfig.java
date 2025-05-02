@@ -39,22 +39,21 @@ public class InitConfig {
             // Mapping Feature ke Role yang relevan
             Map<String, List<String>> featureToRoles = new HashMap<>();
             featureToRoles.put("GET_ALL_BRANCH", List.of("Super Admin"));
-            featureToRoles.put("GET_BRANCH_BY_ID", List.of("Super Admin"));
+//            featureToRoles.put("GET_BRANCH_BY_ID", List.of("Super Admin"));
             featureToRoles.put("CREATE_BRANCH", List.of("Super Admin"));
             featureToRoles.put("UPDATE_BRANCH", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_CUSTOMER", List.of("Super Admin"));
-            featureToRoles.put("GET_CUSTOMER_BY_ID", List.of("Super Admin"));
+//            featureToRoles.put("GET_CUSTOMER_BY_ID", List.of("Super Admin"));
 //            featureToRoles.put("CREATE_PENGAJUAN", List.of("Customer"));
             featureToRoles.put("REVIEW_PENGAJUAN", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("REVIEW_HISTORY", List.of("Marketing", "Branch Manager", "Back Office"));
-            featureToRoles.put("REVIEW_HISTORY_BY_ID", List.of("Marketing", "Branch Manager", "Back Office"));
-            featureToRoles.put("GET_EMPLOYEE_BY_ID", List.of("Marketing", "Branch Manager", "Back Office"));
+//            featureToRoles.put("REVIEW_HISTORY_BY_ID", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("CREATE_PLAFON", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_PLAFON", List.of("Super Admin"));
-            featureToRoles.put("GET_PLAFON_BY_ID", List.of("Super Admin"));
+//            featureToRoles.put("GET_PLAFON_BY_ID", List.of("Super Admin"));
             featureToRoles.put("UPDATE_PLAFON", List.of("Super Admin"));
             featureToRoles.put("DELETE_PLAFON", List.of("Super Admin"));
-            featureToRoles.put("REQ_RESET_PASSWORD", List.of("Marketing", "Branch Manager", "Back Office"));
+//            featureToRoles.put("GET_EMPLOYEE_BY_ID", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("CREATE_EMPLOYEE", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_EMPLOYEE", List.of("Super Admin"));
             featureToRoles.put("UPDATE_EMPLOYEE", List.of("Super Admin"));

@@ -3,7 +3,9 @@ package id.co.bcaf.adapinjam.controllers;
 import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.Pengajuan;
 import id.co.bcaf.adapinjam.models.PengajuanToUserEmployee;
+import id.co.bcaf.adapinjam.models.UserCustomer;
 import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.CustomerRepository;
 import id.co.bcaf.adapinjam.repositories.PengajuanToUserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.services.PengajuanService;
@@ -34,17 +36,30 @@ public class PengajuanController {
     private UserEmployeeRepository userEmployeeRepo;
     @Autowired
     private PengajuanToUserEmployeeRepository pengajuanUserRepo;
+    @Autowired
+    private CustomerRepository customerRepo;
+
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
-    public ResponseEntity<?> createPengajuan(@RequestBody PengajuanRequest request) {
+    public ResponseEntity<?> createPengajuan(
+            @RequestBody PengajuanRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token); // Ganti dengan metode yang sesuai untuk ambil email dari token
+
+        UserCustomer customer = customerRepo.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
         PengajuanResponse response = pengajuanService.createPengajuan(
-                request.getCustomerId(),
+                customer,
                 request.getAmount(),
                 request.getTenor(),
                 request.getLatitude(),
                 request.getLongitude()
         );
+
         return ResponseEntity.ok(response);
     }
 
