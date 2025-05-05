@@ -40,15 +40,15 @@ public class JwtFilter extends GenericFilterBean {
         String authHeader = httpRequest.getHeader("Authorization");
 
         // Bypass filter untuk endpoint login
-        if (httpRequest.getRequestURI().startsWith("/api/v1/users")
-                || httpRequest.getRequestURI().startsWith("/api/v1/auth/login")
-                || httpRequest.getRequestURI().startsWith("/api/v1/auth/register-customer")
-                || httpRequest.getRequestURI().startsWith("/api/v1/auth/forgot-password")
-                || httpRequest.getRequestURI().startsWith("/api/v1/auth/reset-password")
-                || httpRequest.getRequestURI().startsWith("/api/v1/auth/login-employee")
-                || httpRequest.getRequestURI().startsWith("/api/v1/reset-password/employee")
-                || httpRequest.getRequestURI().startsWith("/api/v1/coba/test")
-                || httpRequest.getRequestURI().startsWith("/api/v1/reset-password/employee/reset/{token}")) {
+        if (httpRequest.getRequestURI().startsWith("/be/api/v1/users")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/login")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/register-customer")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/forgot-password")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/reset-password")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/login-employee")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/reset-password/employee")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/coba/test")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/reset-password/employee/reset/{token}")) {
             chain.doFilter(request, response);
             return;
         }
