@@ -28,6 +28,9 @@ public class UserCustomer {
     @Column(name = "tmpt_tgl_lahir", nullable = false)
     private String tempatTglLahir;
 
+    @Column(name = "jenis_kelamin", nullable = false)
+    private String jenisKelamin;
+
     @Column(name = "no_telp", nullable = false)
     private String noTelp;
 

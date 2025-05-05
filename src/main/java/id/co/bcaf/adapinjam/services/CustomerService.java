@@ -52,6 +52,7 @@ public class CustomerService {
         customer.setPlafon(plafon);
         customer.setNik(customerRequest.getNik());
         customer.setTempatTglLahir(customerRequest.getTempatTglLahir());
+        customer.setJenisKelamin(customerRequest.getJenisKelamin());
         customer.setNoTelp(customerRequest.getNoTelp());
         customer.setAlamat(customerRequest.getAlamat());
         customer.setNamaIbuKandung(customerRequest.getNamaIbuKandung());
@@ -74,6 +75,7 @@ public class CustomerService {
 
         customer.setNik(customerRequest.getNik());
         customer.setTempatTglLahir(customerRequest.getTempatTglLahir());
+        customer.setJenisKelamin(customerRequest.getJenisKelamin());
         customer.setNoTelp(customerRequest.getNoTelp());
         customer.setAlamat(customerRequest.getAlamat());
         customer.setNamaIbuKandung(customerRequest.getNamaIbuKandung());
@@ -81,7 +83,7 @@ public class CustomerService {
         customer.setGaji(customerRequest.getGaji());
         customer.setNoRek(customerRequest.getNoRek());
         customer.setStatusRumah(customerRequest.getStatusRumah());
-        customer.setSisaPlafon(customerRequest.getSisaPlafon());
+//        customer.setSisaPlafon(customerRequest.getSisaPlafon());
 
         return customerRepository.save(customer);
     }

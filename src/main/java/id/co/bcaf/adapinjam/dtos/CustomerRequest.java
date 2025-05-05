@@ -14,5 +14,6 @@ public class CustomerRequest {
     private String gaji;
     private String noRek;
     private String statusRumah;
-    private Double sisaPlafon;
+    private String jenisKelamin;
+//    private Double sisaPlafon;
 }
