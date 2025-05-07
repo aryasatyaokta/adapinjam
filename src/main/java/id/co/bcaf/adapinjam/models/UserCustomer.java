@@ -25,8 +25,11 @@ public class UserCustomer {
     @Column(name = "nik", nullable = false)
     private String nik;
 
-    @Column(name = "tmpt_tgl_lahir", nullable = false)
-    private String tempatTglLahir;
+    @Column(name = "tmpt_lahir", nullable = false)
+    private String tempatLahir;
+
+    @Column(name = "tgl_lahir", nullable = false)
+    private String tanggalLahir;
 
     @Column(name = "jenis_kelamin", nullable = false)
     private String jenisKelamin;

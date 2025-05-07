@@ -6,7 +6,8 @@ import lombok.Data;
 public class CustomerRequest {
     private Integer idPlafon;
     private String nik;
-    private String tempatTglLahir;
+    private String tempatLahir;
+    private String tanggalLahir;
     private String noTelp;
     private String alamat;
     private String namaIbuKandung;

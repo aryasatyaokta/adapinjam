@@ -51,7 +51,8 @@ public class CustomerService {
         customer.setUser(user);
         customer.setPlafon(plafon);
         customer.setNik(customerRequest.getNik());
-        customer.setTempatTglLahir(customerRequest.getTempatTglLahir());
+        customer.setTempatLahir(customerRequest.getTempatLahir());
+        customer.setTanggalLahir(customerRequest.getTanggalLahir());
         customer.setJenisKelamin(customerRequest.getJenisKelamin());
         customer.setNoTelp(customerRequest.getNoTelp());
         customer.setAlamat(customerRequest.getAlamat());
@@ -74,7 +75,8 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         customer.setNik(customerRequest.getNik());
-        customer.setTempatTglLahir(customerRequest.getTempatTglLahir());
+        customer.setTempatLahir(customerRequest.getTempatLahir());
+        customer.setTanggalLahir(customerRequest.getTanggalLahir());
         customer.setJenisKelamin(customerRequest.getJenisKelamin());
         customer.setNoTelp(customerRequest.getNoTelp());
         customer.setAlamat(customerRequest.getAlamat());
