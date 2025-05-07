@@ -42,14 +42,16 @@ public class ReviewHistoryResponse {
         private String noRek;
         private String statusRumah;
         private String nik;
-        private String tempatTglLahir;
+        private String tempatLahir;
+        private String tanggalLahir;
+        private String jenisKelamin;
         private String noTelp;
         private String alamat;
         private String namaIbuKandung;
         private Double sisaPlafon;
 
         public CustomerInfo(String nama, String pekerjaan, String gaji, String noRek, String statusRumah,
-                            String nik, String tempatTglLahir, String noTelp, String alamat,
+                            String nik, String tempatLahir, String tanggalLahir, String jenisKelamin,String noTelp, String alamat,
                             String namaIbuKandung, Double sisaPlafon) {
             this.nama = nama;
             this.pekerjaan = pekerjaan;
@@ -57,7 +59,9 @@ public class ReviewHistoryResponse {
             this.noRek = noRek;
             this.statusRumah = statusRumah;
             this.nik = nik;
-            this.tempatTglLahir = tempatTglLahir;
+            this.tempatLahir = tempatLahir;
+            this.tanggalLahir = tanggalLahir;
+            this.jenisKelamin = jenisKelamin;
             this.noTelp = noTelp;
             this.alamat = alamat;
             this.namaIbuKandung = namaIbuKandung;

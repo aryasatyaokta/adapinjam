@@ -243,7 +243,7 @@ public class PengajuanService {
                     ReviewHistoryResponse.CustomerInfo customerInfo = new ReviewHistoryResponse.CustomerInfo(
                             user.getName(), customer.getPekerjaan(), customer.getGaji(),
                             customer.getNoRek(), customer.getStatusRumah(), customer.getNik(),
-                            customer.getTempatTglLahir(), customer.getNoTelp(), customer.getAlamat(),
+                            customer.getTempatLahir(), customer.getTanggalLahir(), customer.getJenisKelamin(),customer.getNoTelp(), customer.getAlamat(),
                             customer.getNamaIbuKandung(), customer.getSisaPlafon()
                     );
 
