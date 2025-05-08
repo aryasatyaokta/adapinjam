@@ -4,6 +4,8 @@ import id.co.bcaf.adapinjam.models.Plafon;
 import id.co.bcaf.adapinjam.services.PlafonService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -28,6 +30,24 @@ public class PlafonController {
     public ResponseEntity<List<Plafon>> getAllPlafons(){
         List<Plafon> plafons = plafonService.getAllPlafons();
         return ResponseEntity.ok(plafons);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Plafon>> getPlafonCust(){
+        List<Plafon> plafons = plafonService.getPlafonCust();
+        return ResponseEntity.ok(plafons);
+    }
+
+    @GetMapping("/token")
+    public ResponseEntity<Plafon> getPlafonByUser() {
+        // Mendapatkan ID pengguna dari token JWT
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // Biasanya username adalah ID pengguna, sesuaikan jika berbeda
+
+        // Mengambil plafon berdasarkan ID pengguna
+        return plafonService.getPlafonByUserId(username)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PLAFON_BY_ID')")
