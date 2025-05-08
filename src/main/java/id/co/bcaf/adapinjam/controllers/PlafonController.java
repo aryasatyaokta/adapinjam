@@ -32,12 +32,6 @@ public class PlafonController {
         return ResponseEntity.ok(plafons);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Plafon>> getPlafonCust(){
-        List<Plafon> plafons = plafonService.getPlafonCust();
-        return ResponseEntity.ok(plafons);
-    }
-
     @GetMapping("/token")
     public ResponseEntity<Plafon> getPlafonByUser() {
         // Mendapatkan ID pengguna dari token JWT
