@@ -24,9 +24,9 @@ public class PlafonService {
         return plafonRepository.findByDeletedFalse();
     }
 
-    public Optional<Plafon> getPlafonByUserId(String userId) {
-        return plafonRepository.findByUserId(userId);  // Pastikan repository mendukung pencarian berdasarkan userId
-    }
+//    public Optional<Plafon> getPlafonByUserId(String userId) {
+//        return plafonRepository.findByUserId(userId);  // Pastikan repository mendukung pencarian berdasarkan userId
+//    }
 
     public Optional<Plafon> getPlafonById(Integer id) {
         return plafonRepository.findById(id)

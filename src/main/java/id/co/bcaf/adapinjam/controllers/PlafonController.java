@@ -32,17 +32,17 @@ public class PlafonController {
         return ResponseEntity.ok(plafons);
     }
 
-    @GetMapping("/token")
-    public ResponseEntity<Plafon> getPlafonByUser() {
-        // Mendapatkan ID pengguna dari token JWT
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Biasanya username adalah ID pengguna, sesuaikan jika berbeda
-
-        // Mengambil plafon berdasarkan ID pengguna
-        return plafonService.getPlafonByUserId(username)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/token")
+//    public ResponseEntity<Plafon> getPlafonByUser() {
+//        // Mendapatkan ID pengguna dari token JWT
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String username = authentication.getName(); // Biasanya username adalah ID pengguna, sesuaikan jika berbeda
+//
+//        // Mengambil plafon berdasarkan ID pengguna
+//        return plafonService.getPlafonByUserId(username)
+//                .map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PLAFON_BY_ID')")
     @GetMapping("/{id}")
