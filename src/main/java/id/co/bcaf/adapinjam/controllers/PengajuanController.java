@@ -103,9 +103,17 @@ public class PengajuanController {
     }
 
     //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FEATURE_GET_IDPENGAJUAN_CUSTOMER')")
-    @GetMapping("/history/{customerId}")
-    public ResponseEntity<?> getHistoryPengajuanByCustomer(@PathVariable UUID customerId) {
-        List<PengajuanHistoryResponse> historyList = pengajuanService.getPengajuanHistoryByCustomer(customerId);
+    @GetMapping("/history-customer")
+    public ResponseEntity<?> getHistoryPengajuanByCustomer(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token); // Ambil email dari JWT
+
+        UserCustomer customer = customerRepo.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        List<PengajuanHistoryResponse> historyList = pengajuanService.getPengajuanHistoryByCustomer(customer.getId());
         return ResponseEntity.ok(historyList);
     }
 

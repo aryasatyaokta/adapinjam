@@ -1,7 +1,10 @@
 package id.co.bcaf.adapinjam.controllers;
 
 import id.co.bcaf.adapinjam.models.Pinjaman;
+import id.co.bcaf.adapinjam.models.UserCustomer;
+import id.co.bcaf.adapinjam.repositories.CustomerRepository;
 import id.co.bcaf.adapinjam.services.PinjamanService;
+import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +19,13 @@ import java.util.UUID;
 public class PinjamanController {
 
     @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     private PinjamanService pinjamanService;
+
+    @Autowired
+    private CustomerRepository customerRepo;
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LUNAS_PEMBAYARAN')")
     @PostMapping("/{id}/lunas")
@@ -26,12 +35,18 @@ public class PinjamanController {
     }
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PINJAMAN')")
-    @GetMapping("/customer/{customerId}")
-    public ResponseEntity<?> getByCustomer(@PathVariable UUID customerId) {
-        return ResponseEntity.ok(pinjamanService.getByCustomerId(customerId));
+    @GetMapping("/customer")
+    public ResponseEntity<?> getByCustomerFromToken(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token); // Ambil email dari JWT
+
+        UserCustomer customer = customerRepo.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return ResponseEntity.ok(pinjamanService.getByCustomerId(customer.getId()));
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PAID_PINJAMAN')")
+    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'PAID_PINJAMAN')")
     @PostMapping("/bayar/{id}")
     public ResponseEntity<?> bayarPinjaman(
             @PathVariable UUID id,
