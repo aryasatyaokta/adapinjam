@@ -2,6 +2,8 @@ package id.co.bcaf.adapinjam.controllers;
 
 import id.co.bcaf.adapinjam.dtos.CustomerRequest;
 import id.co.bcaf.adapinjam.models.UserCustomer;
+import id.co.bcaf.adapinjam.repositories.CustomerRepository;
+import id.co.bcaf.adapinjam.services.CloudinaryService;
 import id.co.bcaf.adapinjam.services.CustomerService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +25,12 @@ public class CustomerController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private CustomerRepository userCustomerRepository;
 
     @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_CUSTOMER')")
     @GetMapping("/all")
@@ -108,5 +118,19 @@ public class CustomerController {
         }
     }
 
+    @PostMapping("/{id}/upload-foto")
+    public ResponseEntity<String> uploadFoto(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        String imageUrl = cloudinaryService.uploadImage(file);
+        Optional<UserCustomer> userOpt = userCustomerRepository.findById(id);
 
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User customer tidak ditemukan");
+        }
+
+        UserCustomer customer = userOpt.get();
+        customer.setFotoUrl(imageUrl);
+        userCustomerRepository.save(customer);
+
+        return ResponseEntity.ok("Foto berhasil diupload. URL: " + imageUrl);
+    }
 }

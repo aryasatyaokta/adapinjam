@@ -57,4 +57,8 @@ public class UserCustomer {
 
     @Column(name = "sisa_plafon", nullable = false)
     private Double sisaPlafon;
+
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
 }

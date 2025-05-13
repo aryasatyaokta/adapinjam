@@ -101,8 +101,6 @@ public class AuthService {
         User savedUser = userRepository.save(user);
 
         String token = jwtUtil.generateVerificationToken(user.getEmail());
-
-        // ✅ Encode token agar URL-nya valid
         String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
         String verificationLink = "http://localhost:4200/verify-email?token=" + encodedToken;
 
