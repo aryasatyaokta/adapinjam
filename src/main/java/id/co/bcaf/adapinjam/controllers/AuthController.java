@@ -4,6 +4,8 @@ import id.co.bcaf.adapinjam.dtos.AuthRequest;
 import id.co.bcaf.adapinjam.dtos.AuthResponse;
 import id.co.bcaf.adapinjam.dtos.RegisterRequest;
 import id.co.bcaf.adapinjam.dtos.UpdatePassRequest;
+import id.co.bcaf.adapinjam.models.User;
+import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.services.AuthService;
 import id.co.bcaf.adapinjam.services.TokenBlacklistService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
@@ -14,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -25,6 +28,8 @@ public class AuthController {
     private AuthService authService;
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
+    @Autowired
+    private UserRepository userRepository;
 
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_CUSTOMER')")
@@ -72,21 +77,14 @@ public class AuthController {
     public ResponseEntity<AuthResponse> registerCustomer(@RequestBody RegisterRequest registerRequest) {
         try {
             authService.registerCustomer(registerRequest);
-            String token = authService.authenticateUser(registerRequest.getUsername(), registerRequest.getPassword());
-
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new AuthResponse("Invalid email or password"));
-            }
-
-            return ResponseEntity.ok(new AuthResponse(token));
+            return ResponseEntity.ok(new AuthResponse("Registrasi berhasil! Silakan cek email untuk verifikasi."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new AuthResponse("Registration failed: " + e.getMessage()));
         }
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
+    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGOUT')")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -134,5 +132,14 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        boolean verified = authService.verifyEmailToken(token);
+        if (verified) {
+            return ResponseEntity.ok("Email berhasil diverifikasi. Silakan login.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token tidak valid atau kadaluarsa.");
+        }
+    }
 
 }

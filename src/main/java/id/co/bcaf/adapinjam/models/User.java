@@ -30,4 +30,7 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "id_role", nullable = false)
     private Role role;
+
+    @Column(name = "is_active")
+    private boolean active = false; // default belum aktif
 }

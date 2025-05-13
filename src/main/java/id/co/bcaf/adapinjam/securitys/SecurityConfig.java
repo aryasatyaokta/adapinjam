@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login-employee").permitAll()
                         .requestMatchers("/api/v1/reset-password/**").permitAll()
                         .requestMatchers("/api/v1/coba/test").permitAll()
+                        .requestMatchers("/api/v1/auth/verify-email").permitAll()
                         .anyRequest().authenticated()  // Endpoint lain harus pakai token
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

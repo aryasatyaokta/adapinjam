@@ -128,4 +128,18 @@ public class JwtUtil {
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public String generateVerificationToken(String email) {
+        Date issuedAt = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 30); // 30 menit
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
+                .claim("type", "email_verification")
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
 }

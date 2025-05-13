@@ -7,6 +7,7 @@ import id.co.bcaf.adapinjam.models.UserEmployee;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +47,13 @@ public class AuthService {
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (passwordEncoder.matches(password, user.getPassword())) { // Hash password checking
+
+            if (!user.isActive()) {
+                logger.warn("User {} belum aktivasi email.", email);
+                return null; // Atau bisa throw exception khusus
+            }
+
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 logger.info("User {} authenticated, generating token...", email);
                 return jwtUtil.generateToken(user);
             }
@@ -53,6 +62,7 @@ public class AuthService {
         logger.warn("Invalid login attempt for email: {}", email);
         return null;
     }
+
 
     public String authenticateUserEmployee(String nip, String password) {
         Optional<UserEmployee> optionalUserEmployee = userEmployeeRepository.findByNip(nip);
@@ -80,15 +90,37 @@ public class AuthService {
         }).orElse(false);
     }
 
-    public User registerCustomer(RegisterRequest request) {
+    public void registerCustomer(RegisterRequest request) {
         User user = new User();
         user.setEmail(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // Hash password
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setRole(new Role(5, "Customer"));
+        user.setActive(false);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        String token = jwtUtil.generateVerificationToken(user.getEmail());
+
+        // ✅ Encode token agar URL-nya valid
+        String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String verificationLink = "http://localhost:4200/verify-email?token=" + encodedToken;
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(user.getEmail());
+            helper.setSubject("Verifikasi Email Anda");
+            helper.setText("Silakan klik link berikut untuk verifikasi akun Anda: <br><a href=\""
+                    + verificationLink + "\">Verifikasi Email</a>", true);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal mengirim email verifikasi: " + e.getMessage());
+        }
     }
+
 
     public void sendResetPasswordEmail(String email) throws Exception {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -124,6 +156,28 @@ public class AuthService {
             return true;
         }).orElse(false);
     }
+
+    public boolean verifyEmailToken(String token) {
+        try {
+            String email = jwtUtil.extractEmail(token);
+            Optional<User> userOpt = userRepository.findByEmail(email);
+
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                user.setActive(true);
+                userRepository.save(user);
+                return true;
+            }
+        } catch (ExpiredJwtException e) {
+            logger.warn("Token expired: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Invalid token: {}", e.getMessage());
+        }
+
+        return false;
+    }
+
+
 
 
 }
