@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/application.properties
+/src/main/resources/firebase/adapinjam-7976e-firebase-adminsdk-fbsvc-bb31b066c5.json

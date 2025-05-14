@@ -32,5 +32,5 @@ public class User {
     private Role role;
 
     @Column(name = "is_active")
-    private boolean active = false; // default belum aktif
+    private boolean active = false;
 }
