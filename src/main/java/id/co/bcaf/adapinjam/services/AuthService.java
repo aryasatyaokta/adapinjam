@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -198,12 +199,15 @@ public class AuthService {
         if (userOpt.isPresent()) {
             user = userOpt.get();
         } else {
-            // Buat user baru jika belum terdaftar
+            // Generate password random
+            String randomPassword = UUID.randomUUID().toString().substring(0, 10);
+
+            // Buat user baru
             user = new User();
             user.setEmail(email);
             user.setName(name);
-            user.setPassword(passwordEncoder.encode("google-auth")); // password dummy
-            user.setRole(new Role(5, "Customer")); // Sesuaikan jika Role ID customer bukan 5
+            user.setPassword(passwordEncoder.encode(randomPassword));
+            user.setRole(new Role(5, "Customer")); // Sesuaikan dengan ID role Customer
             user.setActive(true);
 
             user = userRepository.save(user);
@@ -213,15 +217,24 @@ public class AuthService {
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
                 helper.setTo(email);
                 helper.setSubject("Registrasi Berhasil via Google");
-                helper.setText("Halo " + name + ",<br>Anda berhasil mendaftar melalui Google Sign-In. Selamat datang!", true);
+                helper.setText(
+                        "Halo " + name + ",<br><br>" +
+                                "Anda berhasil mendaftar melalui Google Sign-In.<br>" +
+                                "Berikut adalah password Anda yang dapat digunakan untuk login manual:<br><br>" +
+                                "<b>Password:</b> " + randomPassword + "<br><br>" +
+                                "Silakan ubah password anda untuk keamanan data.<br><br>" +
+                                "Salam,<br>Tim AdaPinjam", true
+                );
                 mailSender.send(message);
             } catch (Exception e) {
                 logger.warn("Gagal mengirim email selamat datang: {}", e.getMessage());
             }
         }
+
         logger.info("User {} berhasil login via Google, generate token...", email);
         return jwtUtil.generateToken(user);
     }
+
 
 
 
