@@ -48,6 +48,7 @@ public class JwtFilter extends GenericFilterBean {
                 || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/login-employee")
                 || httpRequest.getRequestURI().startsWith("/be/api/v1/reset-password/employee")
                 || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/verify-email")
+                || httpRequest.getRequestURI().startsWith("/be/api/v1/auth/login-google")
                 || httpRequest.getRequestURI().startsWith("/be/api/v1/coba/test")
                 || httpRequest.getRequestURI().startsWith("/be/api/v1/reset-password/employee/reset/{token}")) {
             chain.doFilter(request, response);

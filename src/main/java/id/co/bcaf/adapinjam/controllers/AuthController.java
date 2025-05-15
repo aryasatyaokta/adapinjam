@@ -1,9 +1,6 @@
 package id.co.bcaf.adapinjam.controllers;
 
-import id.co.bcaf.adapinjam.dtos.AuthRequest;
-import id.co.bcaf.adapinjam.dtos.AuthResponse;
-import id.co.bcaf.adapinjam.dtos.RegisterRequest;
-import id.co.bcaf.adapinjam.dtos.UpdatePassRequest;
+import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.services.AuthService;
@@ -31,6 +28,20 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @PostMapping("/login-google")
+    public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleAuthRequest request) {
+        String token = authService.loginWithGoogle(request.getIdToken());
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "ID token Google tidak valid atau gagal verifikasi."));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Login dengan Google berhasil.",
+                "token", token
+        ));
+    }
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_CUSTOMER')")
     @PostMapping("/login")

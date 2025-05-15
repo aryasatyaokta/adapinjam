@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/auth/register-customer").permitAll()
                         .requestMatchers("/api/v1/auth/login-employee").permitAll()
+                        .requestMatchers("/api/v1/auth/login-google").permitAll()
                         .requestMatchers("/api/v1/reset-password/**").permitAll()
                         .requestMatchers("/api/v1/coba/test").permitAll()
                         .requestMatchers("/api/v1/auth/verify-email").permitAll()

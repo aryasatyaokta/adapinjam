@@ -1,11 +1,15 @@
 package id.co.bcaf.adapinjam.services;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import id.co.bcaf.adapinjam.dtos.RegisterRequest;
 import id.co.bcaf.adapinjam.models.Role;
 import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.models.UserEmployee;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
+import id.co.bcaf.adapinjam.utils.GoogleTokenVerifier;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import jakarta.mail.internet.MimeMessage;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,13 +38,15 @@ public class AuthService {
     private final UserEmployeeRepository userEmployeeRepository;
     private final JavaMailSender mailSender;
     private final Map<String, String> resetTokenMap = new ConcurrentHashMap<>();
+    private final GoogleTokenVerifier googleTokenVerifier;
 
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository, JavaMailSender mailSender) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository, JavaMailSender mailSender, GoogleTokenVerifier googleTokenVerifier) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userEmployeeRepository = userEmployeeRepository;
         this.mailSender = mailSender;
+        this.googleTokenVerifier = googleTokenVerifier;
     }
 
     public String authenticateUser(String email, String password) {
@@ -175,6 +182,46 @@ public class AuthService {
         return false;
     }
 
+    public String loginWithGoogle(String idTokenString) {
+        GoogleIdToken.Payload payload = googleTokenVerifier.verify(idTokenString);
+        if (payload == null) {
+            logger.warn("Gagal memverifikasi ID Token Google.");
+            return null;
+        }
+
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        User user;
+
+        if (userOpt.isPresent()) {
+            user = userOpt.get();
+        } else {
+            // Buat user baru jika belum terdaftar
+            user = new User();
+            user.setEmail(email);
+            user.setName(name);
+            user.setPassword(passwordEncoder.encode("google-auth")); // password dummy
+            user.setRole(new Role(5, "Customer")); // Sesuaikan jika Role ID customer bukan 5
+            user.setActive(true);
+
+            user = userRepository.save(user);
+
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                helper.setTo(email);
+                helper.setSubject("Registrasi Berhasil via Google");
+                helper.setText("Halo " + name + ",<br>Anda berhasil mendaftar melalui Google Sign-In. Selamat datang!", true);
+                mailSender.send(message);
+            } catch (Exception e) {
+                logger.warn("Gagal mengirim email selamat datang: {}", e.getMessage());
+            }
+        }
+        logger.info("User {} berhasil login via Google, generate token...", email);
+        return jwtUtil.generateToken(user);
+    }
 
 
 
