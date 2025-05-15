@@ -50,6 +50,8 @@ public class NotificationService {
                                 .setTitle(title)
                                 .setBody(body)
                                 .build())
+                        .putData("title", title)
+                        .putData("body", body)
                         .build();
                 FirebaseMessaging.getInstance().send(message);
             } catch (FirebaseMessagingException e) {
