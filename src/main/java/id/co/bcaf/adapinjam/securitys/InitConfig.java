@@ -44,7 +44,7 @@ public class InitConfig {
             featureToRoles.put("UPDATE_BRANCH", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_CUSTOMER", List.of("Super Admin"));
             featureToRoles.put("GET_CUSTOMER_BY_ID", List.of("Super Admin"));
-//            featureToRoles.put("CREATE_PENGAJUAN", List.of("Customer"));
+            featureToRoles.put("CREATE_PENGAJUAN", List.of("Customer"));
             featureToRoles.put("REVIEW_PENGAJUAN", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("REVIEW_HISTORY", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("REVIEW_HISTORY_BY_ID", List.of("Marketing", "Branch Manager", "Back Office"));
