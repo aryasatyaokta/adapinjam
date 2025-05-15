@@ -31,6 +31,9 @@ public class PengajuanService {
     @Autowired
     private BranchRepository branchRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public List<Pengajuan> getPengajuanByCustomerId(UUID customerId) {
         return pengajuanRepo.findByCustomer_Id(customerId);
     }
@@ -117,6 +120,12 @@ public class PengajuanService {
 
             pengajuan.setStatus("REJECT_" + employee.getUser().getRole().getNameRole().toUpperCase());
             pengajuanRepo.save(pengajuan);
+
+            notificationService.sendNotificationToUser(
+                    pengajuan.getCustomer().getUser(),
+                    "Pengajuan Ditolak",
+                    "Pengajuan Anda ditolak oleh " + employee.getUser().getRole().getNameRole()
+            );
             return;
         }
 
@@ -128,11 +137,21 @@ public class PengajuanService {
             case "BCKT_BRANCHMANAGER" -> {
                 pengajuan.setStatus("BCKT_BACKOFFICE");
                 pengajuan.setBranchManagerApprovedAt(LocalDateTime.now());
+                notificationService.sendNotificationToUser(
+                        pengajuan.getCustomer().getUser(),
+                        "Pengajuan Disetujui",
+                        "Pengajuan Anda telah disetujui oleh Branch Manager dan sedang diproses Back Office."
+                );
             }
             case "BCKT_BACKOFFICE" -> {
                 pengajuan.setStatus("DISBURSEMENT");
                 pengajuan.setBackOfficeApprovedAt(LocalDateTime.now());
                 pengajuanRepo.save(pengajuan);
+                notificationService.sendNotificationToUser(
+                        pengajuan.getCustomer().getUser(),
+                        "Pengajuan Dicairkan",
+                        "Pengajuan Anda telah dicairkan. Dana akan segera ditransfer ke rekening Anda."
+                );
 
                 // Simpan sebagai history pinjaman
                 pinjamanService.createPinjamanFromPengajuan(

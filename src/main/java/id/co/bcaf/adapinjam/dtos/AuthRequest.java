@@ -12,9 +12,11 @@ public class AuthRequest {
 
     private String username;
     private String password;
+    private String fcmToken;
 
-    public AuthRequest(String username, String password) {
+    public AuthRequest(String username, String password, String fcmToken) {
         this.username = username;
         this.password = password;
+        this.fcmToken = fcmToken;
     }
 }

@@ -4,9 +4,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import id.co.bcaf.adapinjam.dtos.RegisterRequest;
+import id.co.bcaf.adapinjam.models.FcmToken;
 import id.co.bcaf.adapinjam.models.Role;
 import id.co.bcaf.adapinjam.models.User;
 import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.FcmTokenRepository;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.utils.GoogleTokenVerifier;
@@ -40,17 +42,19 @@ public class AuthService {
     private final JavaMailSender mailSender;
     private final Map<String, String> resetTokenMap = new ConcurrentHashMap<>();
     private final GoogleTokenVerifier googleTokenVerifier;
+    private FcmTokenRepository fcmTokenRepository;
 
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository, JavaMailSender mailSender, GoogleTokenVerifier googleTokenVerifier) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, UserEmployeeRepository userEmployeeRepository, JavaMailSender mailSender, GoogleTokenVerifier googleTokenVerifier, FcmTokenRepository fcmTokenRepository) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.userEmployeeRepository = userEmployeeRepository;
         this.mailSender = mailSender;
         this.googleTokenVerifier = googleTokenVerifier;
+        this.fcmTokenRepository = fcmTokenRepository;
     }
 
-    public String authenticateUser(String email, String password) {
+    public String authenticateUser(String email, String password, String fcmToken) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
@@ -58,11 +62,24 @@ public class AuthService {
 
             if (!user.isActive()) {
                 logger.warn("User {} belum aktivasi email.", email);
-                return null; // Atau bisa throw exception khusus
+                return null;
             }
 
             if (passwordEncoder.matches(password, user.getPassword())) {
                 logger.info("User {} authenticated, generating token...", email);
+
+                Optional<FcmToken> existing = fcmTokenRepository.findByUser_Email(email);
+                if (existing.isPresent()) {
+                    FcmToken tokenEntity = existing.get();
+                    tokenEntity.setToken(fcmToken);
+                    fcmTokenRepository.save(tokenEntity);
+                } else {
+                    FcmToken tokenEntity = new FcmToken();
+                    tokenEntity.setToken(fcmToken);
+                    tokenEntity.setUser(user);
+                    fcmTokenRepository.save(tokenEntity);
+                }
+
                 return jwtUtil.generateToken(user);
             }
         }

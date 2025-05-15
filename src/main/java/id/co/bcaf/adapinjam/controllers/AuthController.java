@@ -46,9 +46,19 @@ public class AuthController {
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_CUSTOMER')")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
-        String token = authService.authenticateUser(authRequest.getUsername(), authRequest.getPassword());
+        String token = authService.authenticateUser(
+                authRequest.getUsername(),
+                authRequest.getPassword(),
+                authRequest.getFcmToken()
+        );
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
         return ResponseEntity.ok(new AuthResponse(token));
     }
+
 
     @GetMapping("/test")
     public ResponseEntity<String> testToken(@RequestHeader("Authorization") String authHeader) {
