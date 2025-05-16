@@ -136,14 +136,13 @@ public class AuthService {
             helper.setTo(user.getEmail());
             helper.setSubject("Verifikasi Email Anda");
             helper.setText("Silakan klik link berikut untuk verifikasi akun Anda: <br><a href=\""
-                    + verificationLink + "\">Verifikasi Email</a>", true);
+                    + verificationLink + "style=\"display:inline-block;padding:10px 20px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;\">Verifikasi Email</a>", true);
 
             mailSender.send(message);
         } catch (Exception e) {
             throw new RuntimeException("Gagal mengirim email verifikasi: " + e.getMessage());
         }
     }
-
 
     public void sendResetPasswordEmail(String email) throws Exception {
         Optional<User> userOpt = userRepository.findByEmail(email);
@@ -154,14 +153,18 @@ public class AuthService {
         String token = jwtUtil.generateResetToken(email); // Custom method
         resetTokenMap.put(token, email);
 
-        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+        String resetLink = "http://localhost:4200/reset-password?token=" + token;
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(email);
-        helper.setSubject("Reset your password");
-        helper.setText("Click the link to reset your password: " + resetLink, true);
+        helper.setSubject("Reset Password Anda");
+        String emailContent = "<p>Silakan klik link berikut untuk reset password Anda:</p>" +
+                "<a href=\"" + resetLink + "\" " +
+                "style=\"display:inline-block;padding:10px 20px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;\">Reset Password</a>";
+
+        helper.setText(emailContent, true);
 
         mailSender.send(message);
     }
