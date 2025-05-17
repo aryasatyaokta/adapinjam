@@ -119,7 +119,34 @@ public class CustomerController {
     }
 
     @PostMapping("/{id}/upload-foto")
-    public ResponseEntity<String> uploadFoto(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFoto(
+            @PathVariable UUID id,
+            @RequestParam(value = "fotoKtp", required = false) MultipartFile fotoKtp,
+            @RequestParam(value = "fotoSelfie", required = false) MultipartFile fotoSelfie) {
+
+        Optional<UserCustomer> userOpt = userCustomerRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User customer tidak ditemukan");
+        }
+
+        UserCustomer customer = userOpt.get();
+
+        if (fotoKtp != null && !fotoKtp.isEmpty()) {
+            String fotoktp = cloudinaryService.uploadImage(fotoKtp);
+            customer.setFotoKtp(fotoktp);
+        }
+
+        if (fotoSelfie != null && !fotoSelfie.isEmpty()) {
+            String fotoSelfieUrl = cloudinaryService.uploadImage(fotoSelfie);
+            customer.setFotoSelfie(fotoSelfieUrl);
+        }
+
+        userCustomerRepository.save(customer);
+        return ResponseEntity.ok("Foto berhasil diupload");
+    }
+
+    @PostMapping("/{id}/upload-profil")
+    public ResponseEntity<String> uploadProfil(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
         String imageUrl = cloudinaryService.uploadImage(file);
         Optional<UserCustomer> userOpt = userCustomerRepository.findById(id);
 
@@ -128,9 +155,10 @@ public class CustomerController {
         }
 
         UserCustomer customer = userOpt.get();
-        customer.setFotoUrl(imageUrl);
+        customer.setFotoProfil(imageUrl);
         userCustomerRepository.save(customer);
 
         return ResponseEntity.ok("Foto berhasil diupload. URL: " + imageUrl);
     }
+
 }

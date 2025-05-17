@@ -59,6 +59,5 @@ public class PinjamanController {
         return ResponseEntity.ok("Pembayaran berhasil diproses.");
     }
 
-
 }
 
