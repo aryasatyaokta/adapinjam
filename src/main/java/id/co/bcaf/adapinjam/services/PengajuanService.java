@@ -41,6 +41,16 @@ public class PengajuanService {
     @Transactional
     public PengajuanResponse createPengajuan(UserCustomer customer, Double amount, Integer tenor, Double latitude, Double longitude) {
 
+        // Cek apakah ada pengajuan aktif (belum selesai)
+        boolean hasActivePengajuan = pengajuanRepo.existsByCustomerAndStatusIn(
+                customer,
+                List.of("BCKT_MARKETING", "BCKT_BRANCHMANAGER", "BCKT_BACKOFFICE")
+        );
+
+        if (hasActivePengajuan) {
+            throw new RuntimeException("Masih ada pengajuan aktif yang belum selesai. Silakan tunggu sampai pengajuan sebelumnya selesai.");
+        }
+
         if (customer.getSisaPlafon() < amount) {
             throw new RuntimeException("Sisa plafon tidak mencukupi untuk pengajuan ini");
         }
@@ -89,7 +99,6 @@ public class PengajuanService {
                 pengajuan.getBackOfficeApprovedAt()
         );
     }
-
 
     public void reviewPengajuan(UUID pengajuanId, UUID employeeId, boolean isApproved, String catatan) {
         PengajuanToUserEmployee link = pengajuanUserRepo.findByPengajuanIdAndUserEmployeeId(pengajuanId, employeeId)
