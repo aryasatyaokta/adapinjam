@@ -41,5 +41,11 @@ public class Pinjaman {
 
     @Column(name = "lunas", nullable = false)
     private Boolean lunas;
+
+    @Column(name = "biaya_admin", nullable = false)
+    private Double biayaAdmin;
+
+    @Column(name = "total_dana_didapat", nullable = false)
+    private Double totalDanaDidapat;
 }
 

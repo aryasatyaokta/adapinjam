@@ -25,13 +25,15 @@ public class PinjamanService {
     @Autowired
     private PlafonRepository plafonRepository;
 
-    public void createPinjamanFromPengajuan(UserCustomer customer, Double amount, Integer tenor, Double bunga, Double angsuran) {
+    public void createPinjamanFromPengajuan(UserCustomer customer, Double amount, Integer tenor, Double bunga, Double angsuran, Double biayaAdmin, Double totalDanaDidapat) {
         Pinjaman pinjaman = new Pinjaman();
         pinjaman.setCustomer(customer);
         pinjaman.setAmount(amount);
         pinjaman.setTenor(tenor);
         pinjaman.setBunga(bunga);
         pinjaman.setAngsuran(angsuran);
+        pinjaman.setBiayaAdmin(biayaAdmin);
+        pinjaman.setTotalDanaDidapat(totalDanaDidapat);
         pinjaman.setSisaTenor(tenor);
         pinjaman.setSisaPokokHutang((angsuran * tenor));
         pinjaman.setLunas(false);

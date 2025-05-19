@@ -175,7 +175,9 @@ public class PengajuanController {
                             pengajuan.getAmount(),
                             pengajuan.getTenor(),
                             pengajuan.getStatus(),
-                            pengajuan.getCreatedAt()
+                            pengajuan.getCreatedAt(),
+                            pengajuan.getBiayaAdmin(),
+                            pengajuan.getTotalDanaDidapat()
                     );
                 })
                 .collect(Collectors.toList());

@@ -39,6 +39,12 @@ public class Pengajuan {
     @Column(name = "bunga", nullable = false)
     private Double bunga;
 
+    @Column(name = "biaya_admin", nullable = false)
+    private Double biayaAdmin;
+
+    @Column(name = "total_dana_didapat", nullable = false)
+    private Double totalDanaDidapat;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

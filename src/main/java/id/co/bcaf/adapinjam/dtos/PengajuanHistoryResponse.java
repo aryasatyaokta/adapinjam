@@ -20,10 +20,12 @@ public class PengajuanHistoryResponse {
     private LocalDateTime branchManagerApprovedAt;
     private LocalDateTime backOfficeApprovedAt;
     private LocalDateTime disbursementAt;
+    private Double biayaAdmin;
+    private Double totalDanaDidapat;
 
     public PengajuanHistoryResponse(UUID pengajuanId, Double amount, Integer tenor, Double bunga, Double angsuran,
                                     String status, LocalDateTime marketingApprovedAt, LocalDateTime branchManagerApprovedAt,
-                                    LocalDateTime backOfficeApprovedAt, LocalDateTime disbursementAt) {
+                                    LocalDateTime backOfficeApprovedAt, LocalDateTime disbursementAt, Double biayaAdmin, Double totalDanaDidapat) {
         this.pengajuanId = pengajuanId;
         this.amount = amount;
         this.tenor = tenor;
@@ -34,5 +36,7 @@ public class PengajuanHistoryResponse {
         this.branchManagerApprovedAt = branchManagerApprovedAt;
         this.backOfficeApprovedAt = backOfficeApprovedAt;
         this.disbursementAt = disbursementAt;
+        this.biayaAdmin = biayaAdmin;
+        this.totalDanaDidapat = totalDanaDidapat;
     }
 }

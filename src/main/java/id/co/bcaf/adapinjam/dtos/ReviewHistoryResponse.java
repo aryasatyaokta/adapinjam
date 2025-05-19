@@ -16,11 +16,13 @@ public class ReviewHistoryResponse {
     private double bunga;
     private Double angsuran;
     private String status;
+    private Double biayaAdmin;
+    private Double totalDanaDidapat;
     private CustomerInfo customer;
     private List<ReviewNoteInfo> reviewNotes;
 
     public ReviewHistoryResponse(UUID pengajuanId, Double amount, int tenor, double bunga, Double angsuran,
-                                 String status, CustomerInfo customer,
+                                 String status, Double biayaAdmin, Double totalDanaDidapat, CustomerInfo customer,
                                  List<ReviewNoteInfo> reviewNotes) {
         this.pengajuanId = pengajuanId;
         this.amount = amount;
@@ -28,6 +30,8 @@ public class ReviewHistoryResponse {
         this.bunga = bunga;
         this.angsuran = angsuran;
         this.status = status;
+        this.biayaAdmin = biayaAdmin;
+        this.totalDanaDidapat = totalDanaDidapat;
         this.customer = customer;
         this.reviewNotes = reviewNotes;
     }

@@ -25,4 +25,6 @@ public class PengajuanResponse {
     private LocalDateTime marketingApprovedAt;
     private LocalDateTime branchManagerApprovedAt;
     private LocalDateTime backOfficeApprovedAt;
+    private Double biayaAdmin;
+    private Double totalDanaDidapat;
 }

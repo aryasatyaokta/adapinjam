@@ -60,6 +60,9 @@ public class PengajuanService {
         double bunga = customer.getPlafon().getBunga();
         double angsuran = calculateAngsuran(amount, tenor, bunga);
 
+        double biayaAdmin = 50000.0;
+        double totalDanaDidapat = amount - biayaAdmin;
+
         Pengajuan pengajuan = new Pengajuan();
         pengajuan.setCustomer(customer);
         pengajuan.setAmount(amount);
@@ -68,6 +71,8 @@ public class PengajuanService {
         pengajuan.setAngsuran(angsuran);
         pengajuan.setStatus("BCKT_MARKETING");
         pengajuan.setCreatedAt(LocalDateTime.now());
+        pengajuan.setBiayaAdmin(biayaAdmin);
+        pengajuan.setTotalDanaDidapat(totalDanaDidapat);
         pengajuanRepo.save(pengajuan);
 
         customer.setSisaPlafon(customer.getSisaPlafon() - amount);
@@ -96,7 +101,9 @@ public class PengajuanService {
                 pengajuan.getCreatedAt(),
                 pengajuan.getMarketingApprovedAt(),
                 pengajuan.getBranchManagerApprovedAt(),
-                pengajuan.getBackOfficeApprovedAt()
+                pengajuan.getBackOfficeApprovedAt(),
+                pengajuan.getBiayaAdmin(),
+                pengajuan.getTotalDanaDidapat()
         );
     }
 
@@ -168,7 +175,9 @@ public class PengajuanService {
                         pengajuan.getAmount(),
                         pengajuan.getTenor(),
                         pengajuan.getBunga(),
-                        pengajuan.getAngsuran()
+                        pengajuan.getAngsuran(),
+                        pengajuan.getBiayaAdmin(),
+                        pengajuan.getTotalDanaDidapat()
                 );
                 return;
             }
@@ -293,6 +302,8 @@ public class PengajuanService {
                             pengajuan.getBunga(),
                             pengajuan.getAngsuran(),
                             pengajuan.getStatus(),
+                            pengajuan.getBiayaAdmin(),
+                            pengajuan.getTotalDanaDidapat(),
                             customerInfo,
                             reviewNotes
                     );
@@ -356,7 +367,9 @@ public class PengajuanService {
                     pengajuan.getMarketingApprovedAt(),
                     pengajuan.getBranchManagerApprovedAt(),
                     pengajuan.getBackOfficeApprovedAt(),
-                    pengajuan.getDisbursementAt()
+                    pengajuan.getDisbursementAt(),
+                    pengajuan.getBiayaAdmin(),
+                    pengajuan.getTotalDanaDidapat()
             );
         }).collect(Collectors.toList());
     }
