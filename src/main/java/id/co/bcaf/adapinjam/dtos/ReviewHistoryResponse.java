@@ -52,11 +52,14 @@ public class ReviewHistoryResponse {
         private String noTelp;
         private String alamat;
         private String namaIbuKandung;
+        private String fotoKtp;
+        private String fotoSelfie;
+        private String fotoProfil;
         private Double sisaPlafon;
 
         public CustomerInfo(String nama, String pekerjaan, String gaji, String noRek, String statusRumah,
                             String nik, String tempatLahir, String tanggalLahir, String jenisKelamin,String noTelp, String alamat,
-                            String namaIbuKandung, Double sisaPlafon) {
+                            String namaIbuKandung, String fotoKtp, String fotoSelfie, String fotoProfil, Double sisaPlafon) {
             this.nama = nama;
             this.pekerjaan = pekerjaan;
             this.gaji = gaji;
@@ -69,6 +72,9 @@ public class ReviewHistoryResponse {
             this.noTelp = noTelp;
             this.alamat = alamat;
             this.namaIbuKandung = namaIbuKandung;
+            this.fotoKtp = fotoKtp;
+            this.fotoSelfie = fotoSelfie;
+            this.fotoProfil = fotoProfil;
             this.sisaPlafon = sisaPlafon;
         }
 

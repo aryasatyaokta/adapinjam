@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -185,7 +186,49 @@ public class PengajuanController {
         return ResponseEntity.ok(responseList);
     }
 
+    @GetMapping("/preview")
+    public ResponseEntity<PengajuanPreviewResponse> previewPengajuan(
+            @RequestParam Double amount,
+            @RequestParam Integer tenor,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtUtil.extractEmail(token);
 
+        UserCustomer customer = customerRepo.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
+        PengajuanPreviewResponse preview = pengajuanService.previewPengajuan(customer, amount, tenor);
+        return ResponseEntity.ok(preview);
+    }
 
+        private final double DEFAULT_BUNGA = 0.06;
+
+        @GetMapping("/simulasi")
+        public ResponseEntity<SimulasiPengajuanResponse> simulasi(
+                @RequestParam("amount") Double amount,
+                @RequestParam("tenor") Integer tenor
+        ) {
+            if (amount <= 0 || tenor <= 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            double bunga = DEFAULT_BUNGA;
+            double bungaPersen = bunga * 100; // misalnya 0.05 * 100 = 5.0
+            double admin = 50000;
+            double danaCair = amount - admin;
+            double angsuran = pengajuanService.calculateAngsuran(amount, tenor, bungaPersen);
+            double totalPembayaran = angsuran * tenor;
+
+            SimulasiPengajuanResponse response = new SimulasiPengajuanResponse();
+            response.setAmount(amount);
+            response.setTenor(tenor);
+            response.setBunga(bungaPersen);
+            response.setAngsuran(angsuran);
+            response.setTotalPembayaran(totalPembayaran);
+            response.setBiayaAdmin(admin);
+            response.setDanaCair(danaCair);
+
+            return ResponseEntity.ok(response);
+        }
 }

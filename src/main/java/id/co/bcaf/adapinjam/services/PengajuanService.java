@@ -210,7 +210,7 @@ public class PengajuanService {
         pengajuanUserRepo.save(newLink);
     }
 
-    private double calculateAngsuran(double amount, int tenor, double bunga) {
+    public double calculateAngsuran(double amount, int tenor, double bunga) {
         double total = amount + (amount * bunga / 100);
         double rawAngsuran = total / tenor;
         return Math.round(rawAngsuran * 100.0) / 100.0;
@@ -281,7 +281,7 @@ public class PengajuanService {
                             user.getName(), customer.getPekerjaan(), customer.getGaji(),
                             customer.getNoRek(), customer.getStatusRumah(), customer.getNik(),
                             customer.getTempatLahir(), customer.getTanggalLahir(), customer.getJenisKelamin(),customer.getNoTelp(), customer.getAlamat(),
-                            customer.getNamaIbuKandung(), customer.getSisaPlafon()
+                            customer.getNamaIbuKandung(),customer.getFotoKtp(), customer.getFotoSelfie(), customer.getFotoProfil(), customer.getSisaPlafon()
                     );
 
                     List<PengajuanToUserEmployee> allReviews = pengajuanUserRepo.findByPengajuanId(pengajuan.getId());
@@ -386,5 +386,11 @@ public class PengajuanService {
         return null; // Jika tidak ada, return null
     }
 
-
+    public PengajuanPreviewResponse previewPengajuan(UserCustomer customer, Double amount, Integer tenor) {
+        double bunga = customer.getPlafon().getBunga();
+        double biayaAdmin = 50000.0;
+        double angsuran = calculateAngsuran(amount, tenor, bunga);
+        double totalDanaDidapat = amount - biayaAdmin;
+        return new PengajuanPreviewResponse(amount, tenor, bunga, angsuran, biayaAdmin, totalDanaDidapat);
+    }
 }
