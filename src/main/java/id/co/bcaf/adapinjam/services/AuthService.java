@@ -103,17 +103,20 @@ public class AuthService {
 
     public boolean updatePassword(String email, String oldPassword, String newPassword) {
         return userRepository.findByEmail(email).map(user -> {
-            if (!passwordEncoder.matches(oldPassword, user.getPassword())) { // Hash password checking
+            if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
                 logger.warn("Update password failed: incorrect old password for user {}", email);
                 return false;
             }
 
             user.setPassword(passwordEncoder.encode(newPassword)); // Hash new password
+            user.setActive(true); // 🔥 Aktifkan akun setelah update password
             userRepository.save(user);
+
             logger.info("Password updated successfully for user {}", email);
             return true;
         }).orElse(false);
     }
+
 
     public void registerCustomer(RegisterRequest request) {
         User user = new User();

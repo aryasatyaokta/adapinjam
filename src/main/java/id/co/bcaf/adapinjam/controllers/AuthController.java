@@ -2,16 +2,21 @@ package id.co.bcaf.adapinjam.controllers;
 
 import id.co.bcaf.adapinjam.dtos.*;
 import id.co.bcaf.adapinjam.models.User;
+import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.repositories.UserRepository;
 import id.co.bcaf.adapinjam.services.AuthService;
 import id.co.bcaf.adapinjam.services.TokenBlacklistService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,6 +32,10 @@ public class AuthController {
     private TokenBlacklistService tokenBlacklistService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserEmployeeRepository userEmployeeRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login-google")
     public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleAuthRequest request) {
@@ -118,16 +127,37 @@ public class AuthController {
     }
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'LOGIN_EMPLOYEE')")
-    @PostMapping("/login-employee")
-    public ResponseEntity<?> loginEmployee(@RequestBody AuthRequest authRequest) {
-        String token = authService.authenticateUserEmployee(authRequest.getUsername(), authRequest.getPassword());
-        if (token != null) {
+@PostMapping("/login-employee")
+public ResponseEntity<?> loginEmployee(@RequestBody AuthRequest authRequest) {
+    Optional<UserEmployee> optionalUserEmployee = userEmployeeRepository.findByNip(authRequest.getUsername());
+
+    if (optionalUserEmployee.isPresent()) {
+        UserEmployee userEmployee = optionalUserEmployee.get();
+
+        if (passwordEncoder.matches(authRequest.getPassword(), userEmployee.getUser().getPassword())) {
+
+            String token = jwtUtil.generateToken(userEmployee.getUser());
+
+            // Jika user belum aktif (harus update password)
+            if (!userEmployee.getUser().isActive()) {
+                Map<String, String> response = new HashMap<>();
+                response.put("token", token);
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(response);
+            }
+
+            // Jika user aktif → login biasa
             return ResponseEntity.ok(new AuthResponse(token));
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid NIP or password");
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FORGOT_PASSWORD_CUSTOMER')")
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid NIP or password");
+}
+
+
+    //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'FORGOT_PASSWORD_CUSTOMER')")
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
