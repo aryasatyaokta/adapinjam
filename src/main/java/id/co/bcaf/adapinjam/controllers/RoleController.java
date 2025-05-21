@@ -41,7 +41,7 @@ public class RoleController {
     @GetMapping("/{roleId}/features")
     public ResponseEntity<List<Feature>> getFeaturesByRole(@PathVariable Integer roleId) {
         List<Feature> features = roleToFeatureService.getFeaturesByRole(roleId);
-        return features.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(features);
+        return ResponseEntity.ok(features); // Kembalikan meskipun kosong
     }
 
     @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_ROLES_FEATURES')")
@@ -57,4 +57,13 @@ public class RoleController {
         roleToFeatureService.updateRoleWithFeatures(Math.toIntExact(roleId), createRoleRequest);
         return ResponseEntity.ok("Role and features updated successfully.");
     }
+
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'DELETE_ROLES_FEATURES')")
+    @DeleteMapping("/delete/{roleId}")
+    public ResponseEntity<String> deleteRole(@PathVariable Integer roleId) {
+        roleToFeatureService.deleteRoleWithFeatures(roleId);
+        return ResponseEntity.ok("Role and associated features deleted successfully.");
+    }
+
+
 }

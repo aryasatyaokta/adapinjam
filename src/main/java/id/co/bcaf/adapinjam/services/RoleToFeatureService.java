@@ -79,4 +79,19 @@ public class RoleToFeatureService {
         }
     }
 
+    @Transactional
+    public void deleteRoleWithFeatures(Integer roleId) {
+        // Ambil role dari database
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + roleId));
+
+        // Hapus semua relasi fitur yang terkait dengan role ini
+        roleToFeatureRepository.deleteByRole(role);
+
+        // Hapus role-nya sendiri
+        roleRepository.delete(role);
+    }
+
+
+
 }

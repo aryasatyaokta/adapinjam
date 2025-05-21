@@ -60,6 +60,7 @@ public class InitConfig {
             featureToRoles.put("GET_ROLES_FEATURES", List.of("Super Admin"));
             featureToRoles.put("CREATE_ROLES_FEATURES", List.of("Super Admin"));
             featureToRoles.put("UPDATE_ROLES_FEATURES", List.of("Super Admin"));
+            featureToRoles.put("DELETE_ROLES_FEATURES", List.of("Super Admin"));
             featureToRoles.put("GET_ALL_ROLES", List.of("Super Admin"));
             // Inisialisasi fitur dan relasi ke role
             for (Map.Entry<String, List<String>> entry : featureToRoles.entrySet()) {
