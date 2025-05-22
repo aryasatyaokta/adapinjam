@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SimulasiPengajuanResponse {
+    private String jenisPlafon;
     private Double amount;
     private Integer tenor;
     private Double bunga;

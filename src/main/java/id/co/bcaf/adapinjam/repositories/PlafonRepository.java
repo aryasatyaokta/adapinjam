@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface PlafonRepository extends JpaRepository<Plafon, Integer> {
     List<Plafon> findByDeletedFalse();
 //    Optional<Plafon> findByUserId(String userId);
+    Plafon findByJenisPlafonAndDeletedFalse(String jenisPlafon);
+
 }

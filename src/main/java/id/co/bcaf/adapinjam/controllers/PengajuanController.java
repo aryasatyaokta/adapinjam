@@ -1,12 +1,10 @@
 package id.co.bcaf.adapinjam.controllers;
 
 import id.co.bcaf.adapinjam.dtos.*;
-import id.co.bcaf.adapinjam.models.Pengajuan;
-import id.co.bcaf.adapinjam.models.PengajuanToUserEmployee;
-import id.co.bcaf.adapinjam.models.UserCustomer;
-import id.co.bcaf.adapinjam.models.UserEmployee;
+import id.co.bcaf.adapinjam.models.*;
 import id.co.bcaf.adapinjam.repositories.CustomerRepository;
 import id.co.bcaf.adapinjam.repositories.PengajuanToUserEmployeeRepository;
+import id.co.bcaf.adapinjam.repositories.PlafonRepository;
 import id.co.bcaf.adapinjam.repositories.UserEmployeeRepository;
 import id.co.bcaf.adapinjam.services.PengajuanService;
 import id.co.bcaf.adapinjam.utils.JwtUtil;
@@ -39,7 +37,8 @@ public class PengajuanController {
     private PengajuanToUserEmployeeRepository pengajuanUserRepo;
     @Autowired
     private CustomerRepository customerRepo;
-
+    @Autowired
+    private PlafonRepository plafonRepository;
 
 //    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CREATE_PENGAJUAN')")
     @PostMapping("/create")
@@ -202,33 +201,44 @@ public class PengajuanController {
         return ResponseEntity.ok(preview);
     }
 
-        private final double DEFAULT_BUNGA = 0.06;
-
-        @GetMapping("/simulasi")
-        public ResponseEntity<SimulasiPengajuanResponse> simulasi(
-                @RequestParam("amount") Double amount,
-                @RequestParam("tenor") Integer tenor
-        ) {
-            if (amount <= 0 || tenor <= 0) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            double bunga = DEFAULT_BUNGA;
-            double bungaPersen = bunga * 100; // misalnya 0.05 * 100 = 5.0
-            double admin = 50000;
-            double danaCair = amount - admin;
-            double angsuran = pengajuanService.calculateAngsuran(amount, tenor, bungaPersen);
-            double totalPembayaran = angsuran * tenor;
-
-            SimulasiPengajuanResponse response = new SimulasiPengajuanResponse();
-            response.setAmount(amount);
-            response.setTenor(tenor);
-            response.setBunga(bungaPersen);
-            response.setAngsuran(angsuran);
-            response.setTotalPembayaran(totalPembayaran);
-            response.setBiayaAdmin(admin);
-            response.setDanaCair(danaCair);
-
-            return ResponseEntity.ok(response);
+    @GetMapping("/simulasi")
+    public ResponseEntity<?> simulasi(
+            @RequestParam("jenisPlafon") String jenisPlafon,
+            @RequestParam("amount") Double amount,
+            @RequestParam("tenor") Integer tenor
+    ) {
+        if (amount == null || amount <= 0 || tenor == null || tenor <= 0) {
+            return ResponseEntity.badRequest().body("Amount dan tenor harus lebih dari 0.");
         }
+
+        // Ambil data plafon dari DB berdasarkan jenis
+        Plafon plafon = plafonRepository.findByJenisPlafonAndDeletedFalse(jenisPlafon);
+        if (plafon == null) {
+            return ResponseEntity.badRequest().body("Jenis plafon tidak ditemukan.");
+        }
+
+        double bunga = plafon.getBunga(); // contoh: 0.05 (5%)
+        double bungaPersen = bunga * 100;
+
+        double admin = 50000;
+        double danaCair = amount - admin;
+
+        // Gunakan rumus perhitungan angsuran dari service
+        double angsuran = pengajuanService.calculateAngsuran(amount, tenor, bunga);
+        double totalPembayaran = angsuran * tenor;
+
+        // Response
+        SimulasiPengajuanResponse response = new SimulasiPengajuanResponse();
+        response.setAmount(amount);
+        response.setTenor(tenor);
+        response.setJenisPlafon(jenisPlafon);
+        response.setBunga(bungaPersen);
+        response.setAngsuran(angsuran);
+        response.setTotalPembayaran(totalPembayaran);
+        response.setBiayaAdmin(admin);
+        response.setDanaCair(danaCair);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
