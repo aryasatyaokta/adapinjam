@@ -53,7 +53,7 @@ public class UserEmployeeController {
         return ResponseEntity.ok(employees);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_EMPLOYEE_BY_ID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'DETAIL_EMPLOYEE')")
     // Endpoint untuk mendapatkan UserEmployee berdasarkan ID (UUID)
     @GetMapping("/get-employee")
     public ResponseEntity<?> getLoggedInUserEmployee() {

@@ -130,7 +130,7 @@ public class PengajuanController {
 //        return ResponseEntity.ok(history);
 //    }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_REVIEW_PENGAJUAN')")
     @GetMapping("/review-history")
     public ResponseEntity<?> getReviewHistory() {
         // Ambil employeeId dari token JWT
@@ -148,7 +148,7 @@ public class PengajuanController {
         return ResponseEntity.ok(history);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'REVIEW_HISTORY_BY_ID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_REVIEW_PENGAJUAN_HISTORY')")
     @GetMapping("/my-reviewed-pengajuan")
     public ResponseEntity<?> getMyReviewedPengajuan() {
         // Ambil employee dari JWT token

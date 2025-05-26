@@ -4,6 +4,7 @@ import id.co.bcaf.adapinjam.models.Feature;
 import id.co.bcaf.adapinjam.repositories.FeatureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class FeatureController {
     @Autowired
     private FeatureRepository featureRepository;
 
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_ALL_FEATURES')")
     @GetMapping
     public List<Feature> getAllFeatures(){
         return featureRepository.findAll();

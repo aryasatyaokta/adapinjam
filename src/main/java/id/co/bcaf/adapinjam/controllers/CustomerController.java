@@ -38,7 +38,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CHECK_PROFILE_CUSTOMER')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CHECK_PROFILE_CUSTOMER')")
     @GetMapping("/check-profile")
     public ResponseEntity<?> checkProfile(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -54,7 +54,7 @@ public class CustomerController {
         return ResponseEntity.ok("Profile complete. You can proceed with applications");
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'CUSTOMER_DETAILS')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'ADD_DETAILS_CUSTOMER')")
     @PostMapping("/add-customer-details")
     public ResponseEntity<?> addCustomerDetails(@RequestHeader("Authorization") String authHeader, @RequestBody CustomerRequest customerRequest){
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
@@ -67,7 +67,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'EDIT_CUSTOMER_DETAILS')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'EDIT_DETAILS_CUSTOMER')")
     @PutMapping("/edit-customer-details")
     public ResponseEntity<?> editCustomerDetails(@RequestHeader("Authorization") String authHeader, @RequestBody CustomerRequest customerRequest) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -107,7 +107,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_CUSTOMER_BY_ID')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'DETAIL_CUSTOMER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCustomerById(@PathVariable UUID id) {
         try {
