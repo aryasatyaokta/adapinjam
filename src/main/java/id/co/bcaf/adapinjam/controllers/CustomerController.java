@@ -93,7 +93,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerId);
     }
 
-//    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_CUSTOMER_PROFILE')")
+    @PreAuthorize("@accessPermission.hasAccess(authentication, 'GET_PROFILE_CUSTOMER')")
     @GetMapping("/get-customer")
     public ResponseEntity<?> getCustomerProfile(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

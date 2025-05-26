@@ -47,6 +47,7 @@ public class InitConfig {
             featureToRoles.put("CHECK_PROFILE_CUSTOMER", List.of("Customer"));
             featureToRoles.put("ADD_DETAILS_CUSTOMER", List.of("Customer"));
             featureToRoles.put("EDIT_DETAILS_CUSTOMER", List.of("Customer"));
+            featureToRoles.put("GET_PROFILE_CUSTOMER", List.of("Customer"));
             featureToRoles.put("CREATE_PENGAJUAN", List.of("Customer"));
             featureToRoles.put("REVIEW_PENGAJUAN", List.of("Marketing", "Branch Manager", "Back Office"));
             featureToRoles.put("GET_REVIEW_PENGAJUAN", List.of("Marketing", "Branch Manager", "Back Office"));
