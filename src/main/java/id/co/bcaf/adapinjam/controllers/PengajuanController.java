@@ -208,7 +208,7 @@ public class PengajuanController {
             @RequestParam("tenor") Integer tenor
     ) {
         if (amount == null || amount <= 0 || tenor == null || tenor <= 0) {
-            return ResponseEntity.badRequest().body("Amount dan tenor harus lebih dari 0.");
+            return ResponseEntity.badRequest().body("Amount dan tenor tidak sesuai");
         }
 
         // Ambil data plafon dari DB berdasarkan jenis
