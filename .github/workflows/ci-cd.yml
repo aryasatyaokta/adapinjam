@@ -20,4 +20,4 @@ jobs:
           distribution: 'temurin'
 
       - name: Build Spring Boot App (Maven)
-        run: ./mvnw clean package -DskipTests
+        run: mvn clean package -DskipTests
