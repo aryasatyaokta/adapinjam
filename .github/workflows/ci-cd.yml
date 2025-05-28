@@ -22,7 +22,10 @@ jobs:
       - name: Create Firebase Admin SDK JSON
         run: |
           mkdir -p src/main/resources/firebase
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > src/main/resources/firebase/adapinjam-7976e-firebase-adminsdk-fbsvc-bb31b066c5.json
+          mkdir -p src/main/resources/firebase
+          cat <<EOF > src/main/resources/firebase/adapinjam-7976e-firebase-adminsdk-fbsvc-bb31b066c5.json
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EOF
 
       - name: Build Spring Boot App (Maven)
         run: mvn clean package -DskipTests
