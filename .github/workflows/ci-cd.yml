@@ -42,7 +42,7 @@ jobs:
             export DB_USER=${{ secrets.DB_USER }}
             export DB_PASS=${{ secrets.DB_PASS }}
             
-            echo "DB_URL=${{ DB_URL }}"
+            echo "DB_URL=${{ secrets.VM_HOSE }}"
             
             pkill -f 'java' || true
             cd /home/${{ secrets.VM_USER }}/adapinjamcobacicd/target
