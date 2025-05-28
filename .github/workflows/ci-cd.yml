@@ -30,3 +30,20 @@ jobs:
             source: "target/*.jar"  # ✅ This works with context from repo root
             target: "/home/${{ secrets.VM_USER }}/adapinjamcobacicd"
 
+      - name: Run Spring Boot on Ubuntu VM with Env Vars
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DB_URL,DB_USER,DB_PASS
+          script: |
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASS=${{ secrets.DB_PASS }}
+            
+            pkill -f 'java' || true
+            cd /home/${{ secrets.VM_USER }}/adapinjamcobacicd/target
+            nohup java -jar *.jar --spring.profiles.active=prod > app.log 2>&1 &
+
+
