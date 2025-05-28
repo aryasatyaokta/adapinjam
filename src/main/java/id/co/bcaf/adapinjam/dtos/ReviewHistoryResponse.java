@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,10 +20,11 @@ public class ReviewHistoryResponse {
     private Double biayaAdmin;
     private Double totalDanaDidapat;
     private CustomerInfo customer;
+    private LocalDateTime createdAt;
     private List<ReviewNoteInfo> reviewNotes;
 
     public ReviewHistoryResponse(UUID pengajuanId, Double amount, int tenor, double bunga, Double angsuran,
-                                 String status, Double biayaAdmin, Double totalDanaDidapat, CustomerInfo customer,
+                                 String status, Double biayaAdmin, Double totalDanaDidapat, CustomerInfo customer, LocalDateTime createdAt,
                                  List<ReviewNoteInfo> reviewNotes) {
         this.pengajuanId = pengajuanId;
         this.amount = amount;
@@ -33,6 +35,7 @@ public class ReviewHistoryResponse {
         this.biayaAdmin = biayaAdmin;
         this.totalDanaDidapat = totalDanaDidapat;
         this.customer = customer;
+        this.createdAt = createdAt;
         this.reviewNotes = reviewNotes;
     }
 

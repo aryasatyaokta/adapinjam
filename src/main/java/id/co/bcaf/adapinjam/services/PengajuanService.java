@@ -305,6 +305,7 @@ public class PengajuanService {
                             pengajuan.getBiayaAdmin(),
                             pengajuan.getTotalDanaDidapat(),
                             customerInfo,
+                            pengajuan.getCreatedAt(),
                             reviewNotes
                     );
                 })
