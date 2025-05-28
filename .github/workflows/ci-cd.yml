@@ -19,6 +19,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Create Firebase Admin SDK JSON
+        run: |
+          mkdir -p src/main/resources/firebase
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > src/main/resources/firebase/adapinjam-7976e-firebase-adminsdk-fbsvc-bb31b066c5.json
+
       - name: Build Spring Boot App (Maven)
         run: mvn clean package -DskipTests
       - name: Copy JAR to GCP VM
@@ -36,18 +41,7 @@ jobs:
           host: ${{ secrets.VM_HOSE }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DB_URL,DB_USER,DB_PASS
           script: |
-            export DB_URL=${{ secrets.DB_URL }}
-            export DB_USER=${{ secrets.DB_USER }}
-            export DB_PASS=${{ secrets.DB_PASS }}
-            
-            echo "DB_URL=${DB_URL}"
-            
-            pkill -f 'java' || true
-            cd /home/${{ secrets.VM_USER }}/adapinjamcobacicd/target
-            ls -lah
-            nohup java -jar *.jar --spring.profiles.active=prod > app.log 2>&1 & disown
-            exit()
+            ./start.sh 
 
 
