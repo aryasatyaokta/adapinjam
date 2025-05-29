@@ -29,7 +29,7 @@ public class BranchService {
     public Branch updateBranch(UUID id, Branch updatedBranch) {
         return branchRepository.findById(id).map(branch -> {
             branch.setBranch(updatedBranch.getBranch());
-            branch.setBranch(updatedBranch.getAddress());
+            branch.setAddress(updatedBranch.getAddress());
             branch.setLatitude(updatedBranch.getLatitude());
             branch.setLongitude(updatedBranch.getLongitude());
             return branchRepository.save(branch);
