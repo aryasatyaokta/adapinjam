@@ -22,6 +22,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -188,7 +189,8 @@ public class AuthService {
 
     public boolean verifyEmailToken(String token) {
         try {
-            String email = jwtUtil.extractEmail(token);
+            String decodedToken = URLDecoder.decode(token, StandardCharsets.UTF_8);
+            String email = jwtUtil.extractEmail(decodedToken);
             Optional<User> userOpt = userRepository.findByEmail(email);
 
             if (userOpt.isPresent()) {
