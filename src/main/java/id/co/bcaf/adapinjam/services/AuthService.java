@@ -139,7 +139,7 @@ public class AuthService {
             helper.setTo(user.getEmail());
             helper.setSubject("Verifikasi Email Anda");
             helper.setText("Silakan klik link berikut untuk verifikasi akun Anda: <br><a href=\""
-                    + verificationLink + "style=\"display:inline-block;padding:10px 20px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;\">Verifikasi Email</a>", true);
+                    + verificationLink + "\" style=\"display:inline-block;padding:10px 20px;background-color:#007bff;color:white;text-decoration:none;border-radius:5px;\">Verifikasi Email</a>", true);
 
             mailSender.send(message);
         } catch (Exception e) {
