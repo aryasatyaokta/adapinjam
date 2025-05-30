@@ -74,7 +74,7 @@ public class ResetPasswordService {
 
     // Mengirim email dengan link reset password
     private void sendResetEmail(String toEmail, String token) {
-        String resetUrl = "http://localhost:4200/reset-password/" + token;
+        String resetUrl = "https://adapinjam.vercel.app/reset-password/" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();

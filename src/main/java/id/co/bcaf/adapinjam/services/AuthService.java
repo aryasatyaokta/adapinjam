@@ -131,7 +131,7 @@ public class AuthService {
 
         String token = jwtUtil.generateVerificationToken(user.getEmail());
         String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-        String verificationLink = "http://localhost:4200/verify-email?token=" + encodedToken;
+        String verificationLink = "https://adapinjam.vercel.app/verify-email?token=" + encodedToken;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -157,7 +157,7 @@ public class AuthService {
         String token = jwtUtil.generateResetToken(email); // Custom method
         resetTokenMap.put(token, email);
 
-        String resetLink = "http://localhost:4200/reset-password?token=" + token;
+        String resetLink = "https://adapinjam.vercel.app/reset-password?token=" + token;
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
