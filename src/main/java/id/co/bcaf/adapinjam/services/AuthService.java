@@ -69,16 +69,28 @@ public class AuthService {
             if (passwordEncoder.matches(password, user.getPassword())) {
                 logger.info("User {} authenticated, generating token...", email);
 
-                Optional<FcmToken> existing = fcmTokenRepository.findByUser_Email(email);
-                if (existing.isPresent()) {
-                    FcmToken tokenEntity = existing.get();
-                    tokenEntity.setToken(fcmToken);
-                    fcmTokenRepository.save(tokenEntity);
+                Optional<FcmToken> byToken = fcmTokenRepository.findByToken(fcmToken);
+                if (byToken.isPresent()) {
+                    FcmToken tokenEntity = byToken.get();
+
+                    // Update user jika token digunakan sebelumnya oleh user lain
+                    if (!tokenEntity.getUser().equals(user)) {
+                        tokenEntity.setUser(user);
+                        fcmTokenRepository.save(tokenEntity);
+                    }
                 } else {
-                    FcmToken tokenEntity = new FcmToken();
-                    tokenEntity.setToken(fcmToken);
-                    tokenEntity.setUser(user);
-                    fcmTokenRepository.save(tokenEntity);
+                    // Cek apakah user sudah punya token sebelumnya
+                    Optional<FcmToken> existing = fcmTokenRepository.findByUser_Email(email);
+                    if (existing.isPresent()) {
+                        FcmToken tokenEntity = existing.get();
+                        tokenEntity.setToken(fcmToken); // ganti token lama
+                        fcmTokenRepository.save(tokenEntity);
+                    } else {
+                        FcmToken tokenEntity = new FcmToken();
+                        tokenEntity.setToken(fcmToken);
+                        tokenEntity.setUser(user);
+                        fcmTokenRepository.save(tokenEntity);
+                    }
                 }
 
                 return jwtUtil.generateToken(user);
